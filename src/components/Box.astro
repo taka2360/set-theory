@@ -1,0 +1,138 @@
+---
+export type BoxKind = 'definition' | 'theorem' | 'example' | 'pitfall' | 'idea' | 'note';
+
+interface Props {
+  kind: BoxKind;
+  /** 例: "定義 1.3"。省略すると種類名 */
+  label?: string;
+  /** 例: "部分集合" */
+  title?: string;
+  id?: string;
+}
+
+const KIND_LABEL: Record<BoxKind, string> = {
+  definition: '定義',
+  theorem: '定理',
+  example: '例',
+  pitfall: 'よくある誤解',
+  idea: 'イメージ',
+  note: 'メモ',
+};
+
+const { kind, label = KIND_LABEL[kind], title, id } = Astro.props;
+---
+
+<section class:list={['box', `box-${kind}`]} id={id} aria-label={title ? `${label}：${title}` : label}>
+  <header class="box-head">
+    <span class="box-icon" aria-hidden="true">
+      {kind === 'definition' && '≔'}
+      {kind === 'theorem' && '★'}
+      {kind === 'example' && '例'}
+      {kind === 'pitfall' && '!'}
+      {kind === 'idea' && '◎'}
+      {kind === 'note' && 'i'}
+    </span>
+    <span class="box-label">{label}</span>
+    {title && <span class="box-title">{title}</span>}
+  </header>
+  <div class="box-body">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .box {
+    --c: var(--accent);
+    --cb: var(--accent-soft);
+    margin: 1.75rem 0;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--c);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    padding: 0.9rem 1.15rem 0.35rem;
+    box-shadow: var(--shadow);
+  }
+
+  .box-definition {
+    --c: var(--def);
+    --cb: var(--def-bg);
+  }
+
+  .box-theorem {
+    --c: var(--thm);
+    --cb: var(--thm-bg);
+    background: linear-gradient(var(--cb), var(--cb)) padding-box;
+    background: color-mix(in srgb, var(--cb) 60%, var(--surface));
+  }
+
+  .box-example {
+    --c: var(--ex);
+    --cb: var(--ex-bg);
+  }
+
+  .box-pitfall {
+    --c: var(--pit);
+    --cb: var(--pit-bg);
+    background: color-mix(in srgb, var(--cb) 55%, var(--surface));
+  }
+
+  .box-idea {
+    --c: var(--idea);
+    --cb: var(--idea-bg);
+  }
+
+  .box-note {
+    --c: var(--muted);
+    --cb: var(--bg);
+    box-shadow: none;
+  }
+
+  .box-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5em;
+    font-family: var(--font-head);
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  .box-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 1.6em;
+    height: 1.6em;
+    border-radius: 6px;
+    background: var(--cb);
+    color: var(--c);
+    font-weight: 700;
+    font-size: 0.85em;
+  }
+
+  .box-label {
+    color: var(--c);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .box-title {
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .box-body :global(> :first-child) {
+    margin-top: 0.5rem;
+  }
+
+  .box-body :global(p) {
+    margin: 0.6rem 0 0.9rem;
+  }
+
+  @media (max-width: 520px) {
+    .box {
+      padding: 0.8rem 0.9rem 0.25rem;
+      margin-left: -4px;
+      margin-right: -4px;
+    }
+  }
+</style>

@@ -1,0 +1,251 @@
+---
+import 'katex/dist/katex.min.css';
+import '../styles/global.css';
+import { withBase } from '../lib/url';
+import Logo from '../components/Logo.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** ヘッダーを読書モード向けに細くする */
+  wide?: boolean;
+  noindex?: boolean;
+}
+
+const SITE_NAME = 'ゼロからの集合論';
+const { title, description = '高校生のための、大学の集合論入門。集合・論理・写像・関係・無限の濃度・選択公理までを、図と演習で基礎から学べる無料の教材です。', noindex = false } = Astro.props;
+const fullTitle = title === SITE_NAME ? `${SITE_NAME} — 高校数学から無限の向こう側まで` : `${title}｜${SITE_NAME}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(withBase('og.png'), Astro.site);
+const path = Astro.url.pathname;
+const nav = [
+  { href: withBase('chapters/'), label: '目次', match: '/chapters/' },
+  { href: withBase('glossary/'), label: '用語・記号', match: '/glossary/' },
+  { href: withBase('search/'), label: '検索', match: '/search/' },
+  { href: withBase('about/'), label: 'このサイト', match: '/about/' },
+];
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#f6f5f1" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111217" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href={withBase('favicon.svg')} type="image/svg+xml" />
+    <link rel="sitemap" href={withBase('sitemap-index.xml')} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="ja_JP" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+    <script is:inline>
+      try {
+        const t = localStorage.getItem('setTheory:theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">本文へスキップ</a>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <slot name="header-start" />
+        <a class="brand" href={withBase('')} aria-label={`${SITE_NAME} トップへ`}>
+          <Logo size={28} />
+          <span class="brand-name">ゼロからの<b>集合論</b></span>
+        </a>
+        <nav class="site-nav" aria-label="サイト">
+          {
+            nav.map((n) => (
+              <a href={n.href} aria-current={path.includes(n.match) ? 'page' : undefined}>
+                {n.label}
+              </a>
+            ))
+          }
+        </nav>
+        <div class="header-tools">
+          <a class="icon-btn search-icon" href={withBase('search/')} aria-label="検索">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+          </a>
+          <ThemeToggle />
+        </div>
+      </div>
+    </header>
+    <slot />
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div>
+          <a class="brand" href={withBase('')}><Logo size={22} /><span class="brand-name">ゼロからの<b>集合論</b></span></a>
+          <p>高校生のための、大学の集合論入門。完全無料・登録不要。</p>
+        </div>
+        <ul>
+          <li><a href={withBase('chapters/')}>目次</a></li>
+          <li><a href={withBase('glossary/')}>用語・記号</a></li>
+          <li><a href={withBase('about/')}>このサイトについて・学習記録</a></li>
+          <li><a href="https://github.com/taka2360/set-theory/issues" rel="noopener">誤りの報告・ご意見（GitHub）</a></li>
+        </ul>
+      </div>
+      <p class="license">本文は <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ja" rel="license noopener">CC BY-SA 4.0</a>、ソースコードは MIT ライセンスで公開しています。</p>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    height: var(--header-h);
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    backdrop-filter: saturate(1.6) blur(14px);
+    -webkit-backdrop-filter: saturate(1.6) blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .site-header-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--ink);
+    text-decoration: none;
+    font-family: var(--font-head);
+    font-weight: 500;
+    font-size: 1.02rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .brand b {
+    font-weight: 700;
+  }
+
+  .site-nav {
+    display: flex;
+    gap: 4px;
+    margin-left: 20px;
+  }
+
+  .site-nav a {
+    padding: 6px 12px;
+    border-radius: 999px;
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+
+  .site-nav a:hover {
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+
+  .site-nav a[aria-current='page'] {
+    color: var(--accent-ink);
+    background: var(--accent-soft);
+  }
+
+  .header-tools {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .icon-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    color: var(--ink-2);
+  }
+
+  .icon-btn:hover {
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+
+  .search-icon {
+    display: none;
+  }
+
+  @media (max-width: 760px) {
+    .site-nav {
+      display: none;
+    }
+
+    .search-icon {
+      display: inline-grid;
+    }
+  }
+
+  .site-footer {
+    margin-top: 6rem;
+    border-top: 1px solid var(--line);
+    background: var(--bg-elev);
+    font-size: 0.9rem;
+    color: var(--ink-2);
+  }
+
+  .site-footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 16px 8px;
+  }
+
+  .site-footer p {
+    margin: 0.6em 0 0;
+  }
+
+  .site-footer ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+  }
+
+  .site-footer a {
+    color: var(--ink-2);
+  }
+
+  .site-footer .brand {
+    color: var(--ink);
+  }
+
+  .license {
+    max-width: 1100px;
+    margin: 0 auto !important;
+    padding: 16px 16px 40px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+</style>

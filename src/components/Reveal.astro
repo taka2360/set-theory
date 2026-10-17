@@ -1,0 +1,55 @@
+---
+// ヒント・解答など「開いて見る」要素
+interface Props {
+  kind?: 'hint' | 'answer';
+  label?: string;
+}
+const { kind = 'answer', label = kind === 'hint' ? 'ヒント' : '解答・解説' } = Astro.props;
+---
+
+<details class:list={['reveal', `reveal-${kind}`]}>
+  <summary><span class="reveal-icon" aria-hidden="true">{kind === 'hint' ? '?' : '✓'}</span>{label}</summary>
+  <div class="reveal-body"><slot /></div>
+</details>
+
+<style>
+  .reveal {
+    margin: 0.6rem 0 0.9rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    min-height: 44px;
+    padding: 0.4rem 0.9rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.93rem;
+    color: var(--ink-2);
+  }
+
+  summary:hover {
+    color: var(--ink);
+  }
+
+  .reveal-answer summary {
+    color: var(--ok);
+  }
+
+  .reveal-icon {
+    font-size: 0.95em;
+  }
+
+  .reveal-body {
+    padding: 0 1rem 0.3rem;
+    border-top: 1px dashed var(--line);
+  }
+
+  .reveal-body :global(p) {
+    margin: 0.6rem 0 0.8rem;
+  }
+</style>

@@ -1,0 +1,702 @@
+---
+import type { MarkdownHeading } from 'astro';
+import BaseLayout from './BaseLayout.astro';
+import type { Chapter } from '../lib/chapters';
+import { chapterUrl } from '../lib/url';
+import '../styles/prose.css';
+
+interface Props {
+  chapter: Chapter;
+  chapters: Chapter[];
+  headings: MarkdownHeading[];
+  quizCount: number;
+}
+
+const { chapter, chapters, headings, quizCount } = Astro.props;
+const { data } = chapter;
+const index = chapters.findIndex((c) => c.id === chapter.id);
+const prev = chapters[index - 1];
+const next = chapters[index + 1];
+const prereqs = data.prereq.map((slug) => chapters.find((c) => c.data.slug === slug)).filter((c): c is Chapter => Boolean(c));
+const toc = headings.filter((h) => h.depth === 2);
+const chapterNo = (c: Chapter) => (c.data.order === 0 ? '序章' : `第${c.data.order}章`);
+const parts = [...new Set(chapters.map((c) => c.data.part))];
+---
+
+<BaseLayout title={`${chapterNo(chapter)} ${data.title}`} description={data.summary}>
+  <button slot="header-start" class="drawer-btn" type="button" aria-controls="chapter-drawer" aria-expanded="false" aria-label="章の一覧を開く" data-drawer-open>
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+  </button>
+  <div class="read-progress" aria-hidden="true"><span data-read-bar></span></div>
+
+  <div class="chapter-shell" data-chapter-key={data.chapterKey} data-quiz-count={quizCount}>
+    <aside class="chapter-nav" id="chapter-drawer" aria-label="章の一覧" data-drawer>
+      <div class="drawer-head">
+        <span>目次</span>
+        <button type="button" class="drawer-close" aria-label="閉じる" data-drawer-close>×</button>
+      </div>
+      <nav>
+        {
+          parts.map((part) => (
+            <div class="nav-part">
+              <p class="nav-part-title">{part}</p>
+              <ol>
+                {chapters
+                  .filter((c) => c.data.part === part)
+                  .map((c) => (
+                    <li>
+                      <a href={chapterUrl(c.data.slug)} aria-current={c.id === chapter.id ? 'page' : undefined} data-nav-key={c.data.chapterKey}>
+                        <span class="nav-status" aria-hidden="true" />
+                        <span class="nav-no">{c.data.order === 0 ? '序' : c.data.order}</span>
+                        <span class="nav-title">{c.data.title}</span>
+                      </a>
+                      {c.id === chapter.id && toc.length > 0 && (
+                        <ol class="nav-toc">
+                          {toc.map((h) => (
+                            <li>
+                              <a href={`#${h.slug}`} data-toc-link={h.slug}>
+                                {h.text}
+                              </a>
+                            </li>
+                          ))}
+                        </ol>
+                      )}
+                    </li>
+                  ))}
+              </ol>
+            </div>
+          ))
+        }
+      </nav>
+    </aside>
+    <div class="drawer-backdrop" data-drawer-backdrop hidden></div>
+
+    <main id="main" class="chapter-main">
+      <header class="chapter-header">
+        <p class="chapter-kicker">
+          <span class="chip">{data.part}</span>
+          <span>{chapterNo(chapter)}</span>
+        </p>
+        <h1 data-pagefind-meta="title">{data.title}</h1>
+        <p class="chapter-summary">{data.summary}</p>
+        <ul class="chapter-meta">
+          <li>
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+            目安 {data.minutes} 分
+          </li>
+          {quizCount > 0 && <li>確認問題 {quizCount} 問</li>}
+          {
+            prereqs.length > 0 && (
+              <li>
+                前提：
+                {prereqs.map((p, i) => (
+                  <>
+                    {i > 0 && '、'}
+                    <a href={chapterUrl(p.data.slug)}>
+                      {chapterNo(p)} {p.data.title}
+                    </a>
+                  </>
+                ))}
+              </li>
+            )
+          }
+        </ul>
+        <div class="goals">
+          <p class="goals-title">この章のゴール</p>
+          <ul>
+            {data.goals.map((g) => <li>{g}</li>)}
+          </ul>
+        </div>
+      </header>
+
+      <article class="prose" data-pagefind-body>
+        <slot />
+      </article>
+
+      <section class="chapter-finish" aria-labelledby="finish-title">
+        <h2 id="finish-title" class="visually-hidden">この章の記録</h2>
+        <div class="finish-card">
+          <div>
+            <p class="finish-label">この章の記録</p>
+            <p class="finish-score" data-score>{quizCount > 0 ? `確認問題 ${quizCount} 問` : ''}</p>
+            <p class="finish-note" data-storage-note hidden>このブラウザでは学習記録を保存できません（本文と問題はそのまま使えます）。</p>
+          </div>
+          <button type="button" class="btn btn-primary" data-read-toggle aria-pressed="false">
+            <span class="when-unread">読み終えた！</span>
+            <span class="when-read">✓ 読了済み</span>
+          </button>
+        </div>
+        <nav class="pager" aria-label="前後の章">
+          {
+            prev ? (
+              <a class="pager-link prev" href={chapterUrl(prev.data.slug)}>
+                <span class="pager-dir">← 前の章</span>
+                <span class="pager-title">
+                  {chapterNo(prev)} {prev.data.title}
+                </span>
+              </a>
+            ) : (
+              <span />
+            )
+          }
+          {
+            next && (
+              <a class="pager-link next" href={chapterUrl(next.data.slug)}>
+                <span class="pager-dir">次の章 →</span>
+                <span class="pager-title">
+                  {chapterNo(next)} {next.data.title}
+                </span>
+              </a>
+            )
+          }
+        </nav>
+      </section>
+    </main>
+
+    <aside class="page-toc" aria-label="この章の見出し">
+      {
+        toc.length > 0 && (
+          <>
+            <p class="page-toc-title">この章の内容</p>
+            <ol>
+              {toc.map((h) => (
+                <li>
+                  <a href={`#${h.slug}`} data-toc-link={h.slug}>
+                    {h.text}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </>
+        )
+      }
+    </aside>
+  </div>
+</BaseLayout>
+
+<script>
+  import { progressStore, summarize } from '../lib/progress';
+
+  const shell = document.querySelector<HTMLElement>('[data-chapter-key]')!;
+  const chapterKey = shell.dataset.chapterKey!;
+  const quizCount = Number(shell.dataset.quizCount ?? 0);
+  const store = progressStore();
+  const readBtn = document.querySelector<HTMLButtonElement>('[data-read-toggle]')!;
+  const score = document.querySelector<HTMLElement>('[data-score]')!;
+
+  const render = () => {
+    const data = store.get();
+    const s = summarize(data, chapterKey);
+    readBtn.setAttribute('aria-pressed', String(s.read));
+    if (quizCount > 0) {
+      score.textContent =
+        s.answered === 0
+          ? `確認問題 ${quizCount} 問（まだ回答していません）`
+          : `回答済み ${s.answered} / ${quizCount} 問・正解 ${s.correct} 問（回答済み問題の正答率 ${Math.round((s.correct / s.answered) * 100)}%）`;
+    }
+    document.querySelectorAll<HTMLElement>('[data-nav-key]').forEach((a) => {
+      const st = summarize(data, a.dataset.navKey!);
+      a.dataset.read = st.read ? '1' : '';
+    });
+    document.querySelector<HTMLElement>('[data-storage-note]')!.hidden = store.available;
+  };
+  render();
+  store.subscribe(render);
+  readBtn.addEventListener('click', () => store.setRead(chapterKey, !summarize(store.get(), chapterKey).read));
+
+  // 読了度バー
+  const bar = document.querySelector<HTMLElement>('[data-read-bar]')!;
+  const article = document.querySelector<HTMLElement>('.prose')!;
+  const updateBar = () => {
+    const rect = article.getBoundingClientRect();
+    const total = rect.height - window.innerHeight * 0.6;
+    const ratio = Math.min(1, Math.max(0, -rect.top / Math.max(1, total)));
+    bar.style.transform = `scaleX(${ratio})`;
+  };
+  document.addEventListener('scroll', updateBar, { passive: true });
+  updateBar();
+
+  // 目次の現在位置
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
+  const targets = [...new Set(links.map((l) => l.dataset.tocLink!))].map((id) => document.getElementById(id)).filter((el): el is HTMLElement => Boolean(el));
+  let current = '';
+  const updateToc = () => {
+    const line = window.innerHeight * 0.25;
+    let active = '';
+    for (const t of targets) if (t.getBoundingClientRect().top < line) active = t.id;
+    if (active === current) return;
+    current = active;
+    for (const l of links) l.toggleAttribute('data-active', l.dataset.tocLink === active);
+  };
+  document.addEventListener('scroll', updateToc, { passive: true });
+  updateToc();
+
+  // ドロワー（スマホ）
+  const drawer = document.querySelector<HTMLElement>('[data-drawer]')!;
+  const openBtn = document.querySelector<HTMLButtonElement>('[data-drawer-open]')!;
+  const closeBtn = document.querySelector<HTMLButtonElement>('[data-drawer-close]')!;
+  const backdrop = document.querySelector<HTMLElement>('[data-drawer-backdrop]')!;
+  const setOpen = (open: boolean) => {
+    drawer.dataset.open = open ? '1' : '';
+    backdrop.hidden = !open;
+    openBtn.setAttribute('aria-expanded', String(open));
+    document.body.style.overflow = open ? 'hidden' : '';
+    if (open) closeBtn.focus();
+    else openBtn.focus();
+  };
+  openBtn.addEventListener('click', () => setOpen(true));
+  closeBtn.addEventListener('click', () => setOpen(false));
+  backdrop.addEventListener('click', () => setOpen(false));
+  drawer.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('a') && drawer.dataset.open) setOpen(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawer.dataset.open) setOpen(false);
+  });
+</script>
+
+<style>
+  .read-progress {
+    position: fixed;
+    top: var(--header-h);
+    left: 0;
+    right: 0;
+    height: 3px;
+    z-index: 39;
+    pointer-events: none;
+  }
+
+  .read-progress span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--thm));
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+
+  .chapter-shell {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr) 220px;
+    gap: 40px;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  .chapter-main {
+    min-width: 0;
+    max-width: var(--measure);
+    width: 100%;
+    margin: 0 auto;
+    padding-top: 2.5rem;
+  }
+
+  /* ---- 左：章一覧 ---- */
+  .chapter-nav {
+    position: sticky;
+    top: var(--header-h);
+    align-self: start;
+    max-height: calc(100vh - var(--header-h));
+    overflow-y: auto;
+    padding: 1.5rem 0.25rem 2rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    scrollbar-width: thin;
+  }
+
+  .drawer-head {
+    display: none;
+  }
+
+  .nav-part + .nav-part {
+    margin-top: 1rem;
+  }
+
+  .nav-part-title {
+    margin: 0 0 0.3rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  .chapter-nav ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .chapter-nav a {
+    display: flex;
+    align-items: baseline;
+    gap: 0.55em;
+    padding: 0.42rem 0.6rem;
+    border-radius: 8px;
+    color: var(--ink-2);
+    text-decoration: none;
+  }
+
+  .chapter-nav a:hover {
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+
+  .chapter-nav a[aria-current='page'] {
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    font-weight: 700;
+  }
+
+  .nav-no {
+    flex: none;
+    width: 1.3em;
+    text-align: right;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nav-status {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    border: 1.5px solid var(--line-strong);
+    align-self: center;
+  }
+
+  .chapter-nav a[data-read='1'] .nav-status {
+    background: var(--ok);
+    border-color: var(--ok);
+  }
+
+  .nav-toc {
+    margin: 0.2rem 0 0.4rem 2.6rem !important;
+    border-left: 1px solid var(--line);
+  }
+
+  .nav-toc a {
+    padding: 0.25rem 0.7rem;
+    font-size: 0.82rem;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .chapter-nav .nav-toc a[data-active] {
+    color: var(--accent-ink);
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
+
+  /* ---- 右：ページ内目次 ---- */
+  .page-toc {
+    position: sticky;
+    top: var(--header-h);
+    align-self: start;
+    padding: 2.5rem 0 2rem;
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+
+  .page-toc-title {
+    margin: 0 0 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  .page-toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 1px solid var(--line);
+  }
+
+  .page-toc a {
+    display: block;
+    padding: 0.3rem 0 0.3rem 0.9rem;
+    margin-left: -1px;
+    border-left: 2px solid transparent;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .page-toc a:hover {
+    color: var(--ink);
+  }
+
+  .page-toc a[data-active] {
+    color: var(--accent-ink);
+    border-left-color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ---- 章ヘッダー ---- */
+  .chapter-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .chapter-header h1 {
+    margin: 0.4rem 0 0.6rem;
+    font-size: clamp(1.85rem, 1.3rem + 2.4vw, 2.6rem);
+    line-height: 1.3;
+  }
+
+  .chapter-summary {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--ink-2);
+  }
+
+  .chapter-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1.2rem;
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0;
+    font-size: 0.86rem;
+    color: var(--muted);
+  }
+
+  .chapter-meta li {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35em;
+  }
+
+  .goals {
+    margin: 1.6rem 0 0;
+    padding: 1rem 1.2rem 0.6rem;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--accent-soft), color-mix(in srgb, var(--thm-bg) 70%, transparent));
+  }
+
+  .goals-title {
+    margin: 0;
+    font-family: var(--font-head);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--accent-ink);
+  }
+
+  .goals ul {
+    margin: 0.4rem 0 0.4rem;
+    padding-left: 1.3em;
+  }
+
+  .goals li::marker {
+    content: '✓  ';
+    color: var(--accent);
+  }
+
+  /* ---- 章末 ---- */
+  .chapter-finish {
+    margin-top: 4rem;
+  }
+
+  .finish-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.2rem 1.4rem;
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+  }
+
+  .finish-card p {
+    margin: 0;
+  }
+
+  .finish-label {
+    font-weight: 700;
+    font-family: var(--font-head);
+  }
+
+  .finish-score,
+  .finish-note {
+    font-size: 0.88rem;
+    color: var(--ink-2);
+  }
+
+  .finish-note {
+    color: var(--pit);
+  }
+
+  .when-read,
+  [aria-pressed='true'] .when-unread {
+    display: none;
+  }
+
+  [aria-pressed='true'] .when-read {
+    display: inline;
+  }
+
+  [data-read-toggle][aria-pressed='true'] {
+    background: var(--ok-bg);
+    border-color: var(--ok);
+    color: var(--ok);
+  }
+
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 1.25rem;
+  }
+
+  .pager-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 1rem 1.2rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    text-decoration: none;
+    color: var(--ink);
+    transition:
+      border-color 0.15s,
+      transform 0.15s;
+  }
+
+  .pager-link:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .pager-link.next {
+    text-align: right;
+    grid-column: 2;
+  }
+
+  .pager-dir {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .pager-title {
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  /* ---- ドロワー ---- */
+  .drawer-btn {
+    display: none;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin-left: -8px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+
+  .drawer-btn:hover {
+    background: var(--accent-soft);
+  }
+
+  .drawer-backdrop {
+    display: none;
+  }
+
+  @media (max-width: 1180px) {
+    .chapter-shell {
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 32px;
+    }
+
+    .page-toc {
+      display: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .chapter-shell {
+      display: block;
+    }
+
+    .drawer-btn {
+      display: inline-grid;
+    }
+
+    .chapter-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 60;
+      width: min(86vw, 340px);
+      max-height: none;
+      padding: 0 0.75rem 2rem;
+      background: var(--bg);
+      box-shadow: var(--shadow-lg);
+      transform: translateX(-105%);
+      transition: transform 0.25s ease;
+      visibility: hidden;
+    }
+
+    .chapter-nav[data-open='1'] {
+      transform: none;
+      visibility: visible;
+    }
+
+    .drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      padding: 0.75rem 0.25rem;
+      background: var(--bg);
+      font-weight: 700;
+      font-family: var(--font-head);
+    }
+
+    .drawer-close {
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .drawer-backdrop:not([hidden]) {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 55;
+      background: rgb(0 0 0 / 0.35);
+    }
+
+    .chapter-main {
+      padding-top: 1.75rem;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .pager {
+      grid-template-columns: 1fr;
+    }
+
+    .pager-link.next {
+      grid-column: 1;
+      grid-row: 1;
+    }
+  }
+</style>

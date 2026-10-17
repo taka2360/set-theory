@@ -1,0 +1,11 @@
+---
+import Box from './Box.astro';
+
+interface Props {
+  label?: string;
+  title?: string;
+  id?: string;
+}
+---
+
+<Box kind="theorem" {...Astro.props}><slot /></Box>

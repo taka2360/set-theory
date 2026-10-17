@@ -1,0 +1,98 @@
+---
+interface Props {
+  correct?: boolean;
+}
+const { correct = false } = Astro.props;
+---
+
+<button type="button" class="choice" data-choice data-correct={correct ? '1' : '0'} aria-pressed="false">
+  <span class="choice-num" data-choice-num aria-hidden="true"></span>
+  <span class="choice-body"><slot /></span>
+  <span class="choice-mark" aria-hidden="true"></span>
+</button>
+
+<style>
+  .choice {
+    display: flex;
+    align-items: center;
+    gap: 0.8em;
+    width: 100%;
+    min-height: 48px;
+    margin: 0.45rem 0;
+    padding: 0.55rem 0.9rem;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    background: var(--bg-elev);
+    text-align: left;
+    line-height: 1.6;
+    cursor: pointer;
+    transition:
+      border-color 0.15s,
+      background-color 0.15s,
+      transform 0.1s;
+  }
+
+  .choice:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .choice:active:not(:disabled) {
+    transform: scale(0.995);
+  }
+
+  .choice:disabled {
+    cursor: default;
+    opacity: 0.75;
+  }
+
+  .choice-num {
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: 1.7em;
+    height: 1.7em;
+    border-radius: 999px;
+    border: 1.5px solid var(--line-strong);
+    font-weight: 700;
+    font-size: 0.85em;
+    color: var(--ink-2);
+  }
+
+  .choice-body {
+    flex: 1;
+  }
+
+  .choice-body :global(p) {
+    margin: 0;
+  }
+
+  .choice-mark {
+    flex: none;
+    font-weight: 700;
+  }
+
+  .choice[data-state='correct'] {
+    opacity: 1;
+    border-color: var(--ok);
+    background: var(--ok-bg);
+  }
+
+  .choice[data-state='correct'] .choice-mark::after {
+    content: '○ 正解';
+    color: var(--ok);
+    font-size: 0.85em;
+  }
+
+  .choice[data-state='wrong'] {
+    opacity: 1;
+    border-color: var(--ng);
+    background: var(--ng-bg);
+  }
+
+  .choice[data-state='wrong'] .choice-mark::after {
+    content: '× あなたの解答';
+    color: var(--ng);
+    font-size: 0.85em;
+  }
+</style>

@@ -1,0 +1,75 @@
+---
+interface Props {
+  /** 1: 基本 / 2: 標準 / 3: 発展 */
+  level: 1 | 2 | 3;
+  label: string;
+  title?: string;
+}
+const LEVELS = { 1: '基本', 2: '標準', 3: '発展' } as const;
+const { level, label, title } = Astro.props;
+---
+
+<section class="exercise" data-level={level} aria-label={`${label}（${LEVELS[level]}）`}>
+  <header>
+    <span class="ex-label">{label}</span>
+    <span class="ex-level" aria-label={`難易度 ${LEVELS[level]}`}>
+      <span aria-hidden="true">{'●'.repeat(level)}{'○'.repeat(3 - level)}</span>
+      {LEVELS[level]}
+    </span>
+    {title && <span class="ex-title">{title}</span>}
+  </header>
+  <div class="ex-body"><slot /></div>
+</section>
+
+<style>
+  .exercise {
+    margin: 1.5rem 0;
+    padding: 1rem 1.15rem 0.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6em;
+    font-family: var(--font-head);
+    font-size: 0.92rem;
+  }
+
+  .ex-label {
+    font-weight: 700;
+  }
+
+  .ex-level {
+    display: inline-flex;
+    gap: 0.4em;
+    padding: 0 0.6em;
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--ink-2);
+    font-size: 0.82rem;
+  }
+
+  .exercise[data-level='1'] .ex-level span {
+    color: var(--ex);
+  }
+
+  .exercise[data-level='2'] .ex-level span {
+    color: var(--def);
+  }
+
+  .exercise[data-level='3'] .ex-level span {
+    color: var(--thm);
+  }
+
+  .ex-title {
+    color: var(--ink-2);
+  }
+
+  .ex-body :global(p) {
+    margin: 0.6rem 0 0.9rem;
+  }
+</style>

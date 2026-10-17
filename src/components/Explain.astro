@@ -1,0 +1,25 @@
+<div class="explain" data-explain hidden>
+  <p class="explain-title">解説</p>
+  <slot />
+</div>
+
+<style>
+  .explain {
+    margin: 0.6rem 0 0.4rem;
+    padding: 0.2rem 1rem 0.2rem;
+    border-left: 3px solid var(--accent);
+    background: var(--bg-elev);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+
+  .explain-title {
+    margin: 0.5rem 0 0 !important;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--accent-ink);
+  }
+
+  .explain :global(p) {
+    margin: 0.4rem 0 0.7rem;
+  }
+</style>

@@ -1,0 +1,99 @@
+---
+interface Props {
+  /** 最初から開いておく */
+  open?: boolean;
+  title?: string;
+}
+const { open = false, title = '証明' } = Astro.props;
+---
+
+<details class="proof" open={open}>
+  <summary>
+    <span class="proof-title">{title}</span>
+    <span class="proof-hint" aria-hidden="true"><span class="when-closed">まず自分で考えてから開こう</span><span class="when-open">閉じる</span></span>
+  </summary>
+  <div class="proof-body">
+    <slot />
+    <p class="qed" aria-label="証明終わり">∎</p>
+  </div>
+</details>
+
+<style>
+  .proof {
+    margin: -1.75rem 0 1.75rem;
+    border: 1px dashed var(--line-strong);
+    border-top: 0;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    background: var(--bg-elev);
+  }
+
+  /* 直前が定理でない場合（単独の証明）は上の枠線を付ける */
+  :global(:not(.box-theorem)) + .proof {
+    margin-top: 1.25rem;
+    border-top: 1px dashed var(--line-strong);
+    border-radius: var(--radius-sm);
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    padding: 0.65rem 1.1rem;
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-head);
+    font-size: 0.92rem;
+    min-height: 44px;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::before {
+    content: '';
+    width: 0.5em;
+    height: 0.5em;
+    border-right: 2px solid var(--ink-2);
+    border-bottom: 2px solid var(--ink-2);
+    transform: rotate(-45deg);
+    transition: transform 0.2s;
+  }
+
+  .proof[open] summary::before {
+    transform: rotate(45deg);
+  }
+
+  .proof-title {
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .proof-hint {
+    color: var(--muted);
+    font-size: 0.85em;
+  }
+
+  .when-open,
+  .proof[open] .when-closed {
+    display: none;
+  }
+
+  .proof[open] .when-open {
+    display: inline;
+  }
+
+  .proof-body {
+    padding: 0 1.15rem 0.5rem;
+  }
+
+  .proof-body :global(p) {
+    margin: 0.5rem 0 0.9rem;
+  }
+
+  .qed {
+    text-align: right;
+    margin: 0 !important;
+    color: var(--ink-2);
+  }
+</style>

@@ -1,0 +1,172 @@
+---
+// 選択式の確認問題。選択肢は <Choice>、解説は <Explain> を子要素として書く。
+// 数式を含む選択肢もビルド時に描画できるよう、Astro コンポーネント＋小さなスクリプトで実装している。
+interface Props {
+  /** 設問 ID（進捗の保存キー）。章内で一意にし、文章を並べ替えても変えない */
+  id: string;
+  label?: string;
+}
+const { id, label = '確認問題' } = Astro.props;
+if (!/^[a-z0-9-]+$/.test(id)) throw new Error(`Quiz の id が不正です: ${id}`);
+---
+
+<section class="quiz" data-quiz data-qid={id} aria-label={label}>
+  <header class="quiz-head">
+    <span class="quiz-badge">{label}</span>
+    <span class="quiz-prev" data-quiz-prev hidden></span>
+  </header>
+  <div class="quiz-body">
+    <slot />
+  </div>
+  <div class="quiz-result" data-quiz-result role="status" aria-live="polite"></div>
+  <button type="button" class="btn btn-ghost quiz-retry" data-quiz-retry hidden>もう一度解く</button>
+</section>
+
+<script>
+  import { progressStore } from '../lib/progress';
+
+  function setup(quiz: HTMLElement) {
+    const qid = quiz.dataset.qid!;
+    const chapterKey = document.querySelector<HTMLElement>('[data-chapter-key]')?.dataset.chapterKey;
+    const choices = Array.from(quiz.querySelectorAll<HTMLButtonElement>('[data-choice]'));
+    const explain = quiz.querySelector<HTMLElement>('[data-explain]');
+    const result = quiz.querySelector<HTMLElement>('[data-quiz-result]')!;
+    const retry = quiz.querySelector<HTMLButtonElement>('[data-quiz-retry]')!;
+    const prev = quiz.querySelector<HTMLElement>('[data-quiz-prev]')!;
+    const store = progressStore();
+    // 結果メッセージは解説の直前に表示する
+    explain?.before(result);
+
+    choices.forEach((c, i) => {
+      c.setAttribute('aria-label', `選択肢 ${i + 1}`);
+      c.querySelector('[data-choice-num]')!.textContent = String.fromCharCode(65 + i);
+    });
+
+    if (chapterKey) {
+      const last = store.get().chapters[chapterKey]?.quiz[qid];
+      if (last !== undefined) {
+        prev.hidden = false;
+        prev.textContent = last ? '前回：正解' : '前回：不正解';
+        prev.dataset.state = last ? 'ok' : 'ng';
+      }
+    }
+
+    const reset = () => {
+      quiz.dataset.answered = '';
+      result.textContent = '';
+      result.dataset.state = '';
+      retry.hidden = true;
+      if (explain) explain.hidden = true;
+      for (const c of choices) {
+        c.disabled = false;
+        c.dataset.state = '';
+        c.setAttribute('aria-pressed', 'false');
+      }
+      choices[0]?.focus();
+    };
+
+    for (const c of choices) {
+      c.addEventListener('click', () => {
+        if (quiz.dataset.answered) return;
+        quiz.dataset.answered = '1';
+        const correct = c.dataset.correct === '1';
+        c.setAttribute('aria-pressed', 'true');
+        for (const other of choices) {
+          other.disabled = true;
+          if (other.dataset.correct === '1') other.dataset.state = 'correct';
+        }
+        if (!correct) c.dataset.state = 'wrong';
+        result.dataset.state = correct ? 'ok' : 'ng';
+        result.textContent = correct ? '正解です！' : '残念、不正解です。正解の選択肢と解説を確認しよう。';
+        if (explain) explain.hidden = false;
+        retry.hidden = false;
+        if (chapterKey) store.recordAnswer(chapterKey, qid, correct);
+        prev.hidden = true;
+      });
+    }
+    retry.addEventListener('click', reset);
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-quiz]').forEach(setup);
+</script>
+
+<style>
+  .quiz {
+    margin: 2rem 0;
+    padding: 1.1rem 1.2rem 0.6rem;
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+
+  .quiz::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    background: linear-gradient(90deg, var(--accent), var(--thm));
+  }
+
+  .quiz-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+  }
+
+  .quiz-badge {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--accent-ink);
+    letter-spacing: 0.06em;
+  }
+
+  .quiz-prev {
+    font-size: 0.78rem;
+    padding: 0 0.6em;
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--muted);
+  }
+
+  .quiz-prev[data-state='ok'] {
+    color: var(--ok);
+  }
+
+  .quiz-prev[data-state='ng'] {
+    color: var(--ng);
+  }
+
+  .quiz-body :global(p) {
+    margin: 0.5rem 0 0.8rem;
+  }
+
+  .quiz-result {
+    font-weight: 700;
+    min-height: 0;
+  }
+
+  .quiz-result:not(:empty) {
+    margin: 0.4rem 0 0.2rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .quiz-result[data-state='ok'] {
+    color: var(--ok);
+    background: var(--ok-bg);
+  }
+
+  .quiz-result[data-state='ng'] {
+    color: var(--ng);
+    background: var(--ng-bg);
+  }
+
+  .quiz-retry {
+    margin: 0.3rem 0 0.4rem -0.6rem;
+    font-size: 0.88rem;
+  }
+</style>

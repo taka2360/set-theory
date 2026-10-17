@@ -1,0 +1,24 @@
+---
+import { render } from 'astro:content';
+import ChapterLayout from '../../layouts/ChapterLayout.astro';
+import { getChapters, type Chapter } from '../../lib/chapters';
+import { countQuizzes } from '../../lib/quiz';
+import { mdxComponents } from '../../components/mdx';
+
+export async function getStaticPaths() {
+  const chapters = await getChapters();
+  return chapters.map((chapter) => ({ params: { slug: chapter.data.slug }, props: { chapter, chapters } }));
+}
+
+interface Props {
+  chapter: Chapter;
+  chapters: Chapter[];
+}
+
+const { chapter, chapters } = Astro.props;
+const { Content, headings } = await render(chapter);
+---
+
+<ChapterLayout chapter={chapter} chapters={chapters} headings={headings} quizCount={countQuizzes(chapter.body)}>
+  <Content components={mdxComponents} />
+</ChapterLayout>
