@@ -23,6 +23,8 @@ export default defineConfig({
   site: 'https://taka2360.github.io',
   base: '/set-theory',
   trailingSlash: 'always',
+  // CSS をインライン化して、描画を止める追加リクエストをなくす
+  build: { inlineStylesheets: 'always' },
   markdown: {
     processor: unified({
       remarkPlugins: [remarkMath],

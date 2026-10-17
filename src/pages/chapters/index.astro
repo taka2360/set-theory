@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Roadmap from '../../components/Roadmap.astro';
+import { getChapters } from '../../lib/chapters';
+
+const chapters = await getChapters();
+const totalMinutes = chapters.reduce((s, c) => s + c.data.minutes, 0);
+---
+
+<BaseLayout title="目次" description="ゼロからの集合論の全章の目次。集合と論理、写像と関係、無限と濃度、公理と選択の4部・全11章。">
+  <main id="main" class="page">
+    <h1>目次</h1>
+    <p class="lead">全 {chapters.length} 章・目安 約 {Math.round(totalMinutes / 60)} 時間。上から順に読めば、各章の前提は自然に満たされます。読み終えた章には ✓ が付きます。</p>
+    <Roadmap chapters={chapters} />
+  </main>
+</BaseLayout>
+
+<style>
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2.5rem 16px 0;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.8rem, 1.4rem + 1.5vw, 2.4rem);
+  }
+
+  .lead {
+    margin: 0.5rem 0 2.5rem;
+    color: var(--ink-2);
+  }
+</style>

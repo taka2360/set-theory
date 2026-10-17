@@ -1,0 +1,199 @@
+---
+import type { Chapter } from '../lib/chapters';
+import { countQuizzes } from '../lib/quiz';
+import { chapterUrl } from '../lib/url';
+
+interface Props {
+  chapters: Chapter[];
+}
+
+const { chapters } = Astro.props;
+const parts = [...new Set(chapters.map((c) => c.data.part))];
+const bySlug = new Map(chapters.map((c) => [c.data.slug, c]));
+const no = (c: Chapter) => (c.data.order === 0 ? '序章' : `第${c.data.order}章`);
+---
+
+<div class="roadmap">
+  {
+    parts.map((part, pi) => (
+      <section class="rm-part" aria-labelledby={`rm-part-${pi}`}>
+        <h3 class="rm-part-title" id={`rm-part-${pi}`}>
+          <span class="rm-part-no">{pi === 0 ? '0' : pi}</span>
+          {part}
+        </h3>
+        <ol class="rm-list">
+          {chapters
+            .filter((c) => c.data.part === part)
+            .map((c) => {
+              const quizzes = countQuizzes(c.body);
+              return (
+                <li>
+                  <a class="rm-card" href={chapterUrl(c.data.slug)} data-rm-key={c.data.chapterKey} data-rm-quiz={quizzes}>
+                    <span class="rm-no">{no(c)}</span>
+                    <span class="rm-title">{c.data.title}</span>
+                    <span class="rm-summary">{c.data.summary}</span>
+                    <span class="rm-meta">
+                      <span>{c.data.minutes} 分</span>
+                      {quizzes > 0 && <span>確認問題 {quizzes} 問</span>}
+                      {c.data.prereq.length > 0 && (
+                        <span class="rm-prereq">
+                          前提：
+                          {c.data.prereq
+                            .map((s) => bySlug.get(s))
+                            .filter(Boolean)
+                            .map((p) => (p!.data.order === 0 ? '序' : p!.data.order))
+                            .join('・')}
+                        </span>
+                      )}
+                    </span>
+                    <span class="rm-progress" data-rm-progress aria-live="polite" />
+                  </a>
+                </li>
+              );
+            })}
+        </ol>
+      </section>
+    ))
+  }
+</div>
+
+<script>
+  import { progressStore, summarize } from '../lib/progress';
+
+  const store = progressStore();
+  const render = () => {
+    const data = store.get();
+    document.querySelectorAll<HTMLElement>('[data-rm-key]').forEach((card) => {
+      const s = summarize(data, card.dataset.rmKey!);
+      const total = Number(card.dataset.rmQuiz ?? 0);
+      const el = card.querySelector<HTMLElement>('[data-rm-progress]')!;
+      card.dataset.read = s.read ? '1' : '';
+      const parts: string[] = [];
+      if (s.read) parts.push('✓ 読了');
+      if (s.answered > 0) parts.push(`回答 ${s.answered}/${total}・正解 ${s.correct}`);
+      el.textContent = parts.join('　');
+    });
+  };
+  render();
+  store.subscribe(render);
+</script>
+
+<style>
+  .roadmap {
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  .rm-part-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0 0 1rem;
+    font-size: 1.15rem;
+  }
+
+  .rm-part-no {
+    display: inline-grid;
+    place-items: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--bg);
+    font-size: 0.9rem;
+  }
+
+  .rm-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: 14px;
+  }
+
+  .rm-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    height: 100%;
+    padding: 1.1rem 1.2rem 1rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    text-decoration: none;
+    line-height: 1.6;
+    transition:
+      border-color 0.15s,
+      transform 0.15s,
+      box-shadow 0.15s;
+  }
+
+  .rm-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .rm-card[data-read='1'] {
+    border-color: color-mix(in srgb, var(--ok) 45%, var(--line));
+  }
+
+  .rm-card[data-read='1']::after {
+    content: '✓';
+    position: absolute;
+    top: 0.9rem;
+    right: 1rem;
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 999px;
+    background: var(--ok);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .rm-no {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent-ink);
+    letter-spacing: 0.05em;
+  }
+
+  .rm-title {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 1.08rem;
+    line-height: 1.45;
+    padding-right: 1.8rem;
+  }
+
+  .rm-summary {
+    font-size: 0.86rem;
+    color: var(--ink-2);
+    flex: 1;
+  }
+
+  .rm-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.9rem;
+    margin-top: 0.3rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .rm-progress {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ok);
+  }
+
+  .rm-progress:empty {
+    display: none;
+  }
+</style>

@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/url';
+---
+
+<BaseLayout title="ページが見つかりません" noindex>
+  <main id="main" class="nf">
+    <p class="code">∅</p>
+    <h1>お探しのページは空集合でした</h1>
+    <p>URL が変わったか、ページが削除された可能性があります。</p>
+    <p><a class="btn btn-primary" href={withBase('')}>トップへ戻る</a> <a class="btn" href={withBase('chapters/')}>目次を見る</a></p>
+  </main>
+</BaseLayout>
+
+<style>
+  .nf {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 5rem 16px 0;
+    text-align: center;
+  }
+
+  .code {
+    margin: 0;
+    font-family: 'KaTeX_Main', serif;
+    font-size: 6rem;
+    line-height: 1;
+    color: var(--accent);
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+</style>

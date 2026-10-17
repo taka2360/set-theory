@@ -1,0 +1,287 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { inlineMath } from '../lib/inlineMath';
+import { chapterUrl } from '../lib/url';
+import '../styles/prose.css';
+
+interface SymbolRow {
+  tex: string;
+  reading: string;
+  meaning: string;
+  chapter: string;
+}
+
+interface Term {
+  term: string;
+  kana: string;
+  desc: string;
+  chapter: string;
+}
+
+const symbols: SymbolRow[] = [
+  { tex: '$a \\in A$', reading: 'a は A に属する（要素である）', meaning: '$a$ は集合 $A$ の要素', chapter: 'sets' },
+  { tex: '$a \\notin A$', reading: 'a は A に属さない', meaning: '$a$ は $A$ の要素ではない', chapter: 'sets' },
+  { tex: '$\\{\\, x \\mid P(x) \\,\\}$', reading: 'P(x) を満たす x 全体の集合', meaning: '内包的記法', chapter: 'sets' },
+  { tex: '$\\varnothing$', reading: '空集合（くうしゅうごう）', meaning: '要素を持たない集合', chapter: 'sets' },
+  { tex: '$A \\subseteq B$', reading: 'A は B に含まれる／A は B の部分集合', meaning: 'すべての $x$ について $x \\in A \\Rightarrow x \\in B$', chapter: 'sets' },
+  { tex: '$A \\subsetneq B$', reading: 'A は B の真部分集合', meaning: '$A \\subseteq B$ かつ $A \\ne B$', chapter: 'sets' },
+  { tex: '$\\mathbb{N},\\ \\mathbb{Z},\\ \\mathbb{Q},\\ \\mathbb{R}$', reading: '自然数・整数・有理数・実数全体', meaning: 'このサイトでは $\\mathbb{N} = \\{1, 2, 3, \\dots\\}$', chapter: 'sets' },
+  { tex: '$\\lnot P$', reading: 'P でない（否定）', meaning: '$P$ が偽のとき真', chapter: 'logic' },
+  { tex: '$P \\land Q$', reading: 'P かつ Q', meaning: '両方が真のとき真', chapter: 'logic' },
+  { tex: '$P \\lor Q$', reading: 'P または Q', meaning: '少なくとも一方が真のとき真', chapter: 'logic' },
+  { tex: '$P \\Rightarrow Q$', reading: 'P ならば Q（含意）', meaning: '$P$ が真で $Q$ が偽のときだけ偽', chapter: 'logic' },
+  { tex: '$P \\iff Q$', reading: 'P と Q は同値', meaning: '真偽が一致する', chapter: 'logic' },
+  { tex: '$\\forall x$', reading: 'すべての x について（全称量化子）', meaning: 'All の A を逆さにした記号', chapter: 'logic' },
+  { tex: '$\\exists x$', reading: 'ある x が存在して（存在量化子）', meaning: 'Exist の E を逆さにした記号', chapter: 'logic' },
+  { tex: '$A \\cup B$', reading: 'A と B の和集合（A カップ B）', meaning: '少なくとも一方に属するもの全体', chapter: 'operations' },
+  { tex: '$A \\cap B$', reading: 'A と B の共通部分（A キャップ B）', meaning: '両方に属するもの全体', chapter: 'operations' },
+  { tex: '$A \\setminus B$', reading: 'A と B の差集合', meaning: '$A$ に属し $B$ に属さないもの全体', chapter: 'operations' },
+  { tex: '$A^c$', reading: 'A の補集合', meaning: '全体集合のうち $A$ に属さないもの全体（高校では $\\overline{A}$）', chapter: 'operations' },
+  { tex: '$\\mathcal{P}(A)$', reading: 'A の冪集合（べきしゅうごう）', meaning: '$A$ の部分集合全体の集合', chapter: 'operations' },
+  { tex: '$A \\times B$', reading: 'A と B の直積', meaning: '順序対 $(a, b)$ 全体の集合', chapter: 'operations' },
+  { tex: '$\\bigcup_{i \\in I} A_i$', reading: '集合族の和集合', meaning: 'ある $A_i$ に属するもの全体', chapter: 'operations' },
+  { tex: '$f \\colon X \\to Y$', reading: 'X から Y への写像 f', meaning: '各 $x$ に $Y$ の要素をちょうど1つ対応させる', chapter: 'maps' },
+  { tex: '$f(A),\\ f^{-1}(B)$', reading: '像・逆像', meaning: '行き先の集合／行き先が $B$ に入るもの全体', chapter: 'maps' },
+  { tex: '$g \\circ f$', reading: 'f と g の合成写像', meaning: '先に $f$、次に $g$', chapter: 'maps' },
+  { tex: '$\\mathrm{id}_X$', reading: '恒等写像', meaning: '$x \\mapsto x$', chapter: 'maps' },
+  { tex: '$a \\equiv b \\pmod{n}$', reading: 'a と b は n を法として合同', meaning: '$a - b$ が $n$ の倍数', chapter: 'relations' },
+  { tex: '$[a],\\ X/{\\sim}$', reading: '同値類・商集合', meaning: '$a$ と同値なもの全体／同値類全体', chapter: 'relations' },
+  { tex: '$\\sup S,\\ \\inf S$', reading: '上限（スープ）・下限（インフ）', meaning: '上界の最小・下界の最大', chapter: 'orders' },
+  { tex: '$\\lvert A \\rvert$', reading: 'A の濃度', meaning: '集合の「大きさ」', chapter: 'countable' },
+  { tex: '$\\aleph_0$', reading: 'アレフ・ゼロ', meaning: '可算無限集合の濃度', chapter: 'countable' },
+  { tex: '$\\mathfrak{c}$', reading: '連続体濃度', meaning: '$\\lvert \\mathbb{R} \\rvert = \\lvert \\mathcal{P}(\\mathbb{N}) \\rvert$', chapter: 'cbs' },
+];
+
+const terms: Term[] = [
+  { term: '集合', kana: 'しゅうごう', desc: '入っているかどうかがはっきり決まるものの集まり。', chapter: 'sets' },
+  { term: '要素（元）', kana: 'ようそ（げん）', desc: '集合に入っている一つひとつのもの。', chapter: 'sets' },
+  { term: '外延的記法', kana: 'がいえんてききほう', desc: '要素を並べて集合を書く方法。例：$\\{1, 2, 3\\}$。', chapter: 'sets' },
+  { term: '内包的記法', kana: 'ないほうてききほう', desc: '条件で集合を書く方法。例：$\\{\\, x \\mid x > 0 \\,\\}$。', chapter: 'sets' },
+  { term: '空集合', kana: 'くうしゅうごう', desc: '要素を一つも持たない集合 $\\varnothing$。$\\{\\varnothing\\}$ とは違う。', chapter: 'sets' },
+  { term: '部分集合', kana: 'ぶぶんしゅうごう', desc: '$A$ のどの要素も $B$ の要素であるとき、$A$ は $B$ の部分集合。', chapter: 'sets' },
+  { term: '反例', kana: 'はんれい', desc: '「すべての〜で成り立つ」を否定する1つの例。', chapter: 'sets' },
+  { term: '命題', kana: 'めいだい', desc: '真か偽かがはっきり決まる文。', chapter: 'logic' },
+  { term: '対偶', kana: 'たいぐう', desc: '$P \\Rightarrow Q$ に対する $\\lnot Q \\Rightarrow \\lnot P$。元の命題と同値。', chapter: 'logic' },
+  { term: '背理法', kana: 'はいりほう', desc: '結論の否定を仮定して矛盾を導く証明法。', chapter: 'logic' },
+  { term: '数学的帰納法', kana: 'すうがくてききのうほう', desc: '基礎と帰納段階を示して、すべての自然数で成り立つことを示す方法。', chapter: 'logic' },
+  { term: 'ド・モルガンの法則', kana: 'どもるがんのほうそく', desc: '「かつ」の否定は「または」、「または」の否定は「かつ」。集合では $(A \\cup B)^c = A^c \\cap B^c$。', chapter: 'operations' },
+  { term: '冪集合', kana: 'べきしゅうごう', desc: '部分集合全体の集合 $\\mathcal{P}(A)$。', chapter: 'operations' },
+  { term: '直積', kana: 'ちょくせき', desc: '順序対全体の集合 $A \\times B$。', chapter: 'operations' },
+  { term: '写像', kana: 'しゃぞう', desc: '各要素に行き先をちょうど1つ対応させる規則。', chapter: 'maps' },
+  { term: '単射', kana: 'たんしゃ', desc: '$f(x_1) = f(x_2) \\Rightarrow x_1 = x_2$ を満たす写像。', chapter: 'maps' },
+  { term: '全射', kana: 'ぜんしゃ', desc: '終域のどの要素にも、そこへ移る要素がある写像。', chapter: 'maps' },
+  { term: '全単射', kana: 'ぜんたんしゃ', desc: '単射かつ全射。逆写像を持つことと同値。', chapter: 'maps' },
+  { term: '逆像', kana: 'ぎゃくぞう', desc: '行き先が $B$ に入る要素全体 $f^{-1}(B)$。逆写像がなくても定義できる。', chapter: 'maps' },
+  { term: '同値関係', kana: 'どうちかんけい', desc: '反射律・対称律・推移律を満たす関係。', chapter: 'relations' },
+  { term: '同値類', kana: 'どうちるい', desc: 'ある要素と同値な要素全体の集合。', chapter: 'relations' },
+  { term: '商集合', kana: 'しょうしゅうごう', desc: '同値類全体の集合。', chapter: 'relations' },
+  { term: 'well-defined', kana: 'うぇるでぃふぁいんど', desc: '代表元の選び方によらずに決まること。', chapter: 'relations' },
+  { term: '半順序', kana: 'はんじゅんじょ', desc: '反射律・反対称律・推移律を満たす関係。', chapter: 'orders' },
+  { term: '全順序', kana: 'ぜんじゅんじょ', desc: 'どの2つの要素も比較できる半順序。', chapter: 'orders' },
+  { term: '最大元', kana: 'さいだいげん', desc: 'すべての要素以上である要素。あればただ1つ。', chapter: 'orders' },
+  { term: '極大元', kana: 'きょくだいげん', desc: '自分より真に上の要素がない要素。複数あることもある。', chapter: 'orders' },
+  { term: '上界・上限', kana: 'じょうかい・じょうげん', desc: 'すべての要素以上の要素が上界。上界の最小が上限。', chapter: 'orders' },
+  { term: '濃度', kana: 'のうど', desc: '集合の大きさ。全単射があるとき濃度が等しい。', chapter: 'countable' },
+  { term: '可算集合', kana: 'かさんしゅうごう', desc: '$\\mathbb{N}$ と濃度が等しい集合。もれなく重複なく1列に並べられる。', chapter: 'countable' },
+  { term: '非可算集合', kana: 'ひかさんしゅうごう', desc: '有限でも可算でもない集合。例：$\\mathbb{R}$。', chapter: 'uncountable' },
+  { term: '対角線論法', kana: 'たいかくせんろんぽう', desc: 'リストの対角線を変えて、リストにない要素を作る論法。', chapter: 'uncountable' },
+  { term: 'カントールの定理', kana: 'かんとーるのていり', desc: 'どんな集合 $A$ についても $\\lvert A \\rvert < \\lvert \\mathcal{P}(A) \\rvert$。', chapter: 'uncountable' },
+  { term: 'カントール＝ベルンシュタイン＝シュレーダーの定理', kana: 'かんとーるべるんしゅたいんしゅれーだーのていり', desc: '両方向に単射があれば全単射がある。', chapter: 'cbs' },
+  { term: 'ラッセルのパラドックス', kana: 'らっせるのぱらどっくす', desc: '$\\{\\, x \\mid x \\notin x \\,\\}$ を集合と認めると矛盾する。', chapter: 'choice' },
+  { term: '公理図式', kana: 'こうりずしき', desc: 'すべての条件について1つずつ認める、無限個の公理の集まり（分出・置換）。', chapter: 'choice' },
+  { term: '選択公理', kana: 'せんたくこうり', desc: '空でない集合の族には選択関数が存在する。', chapter: 'choice' },
+  { term: '整列可能定理', kana: 'せいれつかのうていり', desc: 'どんな集合にも整列順序がある。選択公理と同値。', chapter: 'choice' },
+  { term: 'ツォルンの補題', kana: 'つぉるんのほだい', desc: 'すべての鎖が上界を持つ半順序集合には極大元がある。選択公理と同値。', chapter: 'choice' },
+];
+
+const chapterName: Record<string, string> = {
+  sets: '第1章',
+  logic: '第2章',
+  operations: '第3章',
+  maps: '第4章',
+  relations: '第5章',
+  orders: '第6章',
+  countable: '第7章',
+  uncountable: '第8章',
+  cbs: '第9章',
+  choice: '第10章',
+};
+---
+
+<BaseLayout title="用語・記号" description="集合論でよく使う記号の読み方と意味、用語の一覧。初出の章へのリンク付き。">
+  <main id="main" class="page" data-pagefind-body>
+    <h1 data-pagefind-meta="title">用語・記号</h1>
+    <p class="lead">記号の読み方と意味、主な用語を、初めて出てくる章の順に並べています。章名をクリックすると、その章へ移動します。</p>
+
+    <nav class="jump" aria-label="ページ内リンク">
+      <a href="#symbols">記号の一覧</a>
+      <a href="#terms">用語の一覧</a>
+    </nav>
+
+    <h2 id="symbols">記号の一覧</h2>
+    <div class="table-wrap">
+      <table class="sym">
+        <thead>
+          <tr><th scope="col">記号</th><th scope="col">読み方</th><th scope="col">意味</th><th scope="col">初出</th></tr>
+        </thead>
+        <tbody>
+          {
+            symbols.map((s) => (
+              <tr>
+                <td class="sym-tex" set:html={inlineMath(s.tex)} />
+                <td>{s.reading}</td>
+                <td set:html={inlineMath(s.meaning)} />
+                <td class="sym-ch">
+                  <a href={`${chapterUrl(s.chapter)}`}>{chapterName[s.chapter]}</a>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="terms">用語の一覧</h2>
+    <dl class="terms">
+      {
+        terms.map((t) => (
+          <div class="term">
+            <dt>
+              <span class="term-name">{t.term}</span>
+              <span class="term-kana">{t.kana}</span>
+            </dt>
+            <dd>
+              <span set:html={inlineMath(t.desc)} />
+              <a class="term-ch" href={chapterUrl(t.chapter)}>
+                {chapterName[t.chapter]}
+              </a>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </main>
+</BaseLayout>
+
+<style>
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2.5rem 16px 0;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.8rem, 1.4rem + 1.5vw, 2.4rem);
+  }
+
+  h2 {
+    margin: 3rem 0 1rem;
+    font-size: 1.4rem;
+  }
+
+  .lead {
+    margin: 0.5rem 0 1.2rem;
+    color: var(--ink-2);
+  }
+
+  .jump {
+    display: flex;
+    gap: 8px;
+  }
+
+  .jump a {
+    padding: 0.3em 0.9em;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .sym {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .sym th,
+  .sym td {
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  .sym tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .sym th {
+    background: var(--bg-elev);
+    font-size: 0.82rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .sym-tex {
+    white-space: nowrap;
+    font-size: 1.05rem;
+  }
+
+  .sym-ch {
+    white-space: nowrap;
+  }
+
+  .terms {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: 12px;
+    margin: 0;
+  }
+
+  .term {
+    padding: 0.9rem 1.1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .term dt {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5em;
+  }
+
+  .term-name {
+    font-weight: 700;
+    font-family: var(--font-head);
+  }
+
+  .term-kana {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .term dd {
+    margin: 0.3rem 0 0;
+    font-size: 0.88rem;
+    color: var(--ink-2);
+    line-height: 1.7;
+  }
+
+  .term-ch {
+    margin-left: 0.5em;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+</style>

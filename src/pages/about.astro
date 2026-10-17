@@ -1,0 +1,181 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { chapterUrl } from '../lib/url';
+import '../styles/prose.css';
+---
+
+<BaseLayout title="このサイトについて" description="ゼロからの集合論の目的、到達目標、学習記録の保存方法と管理、誤りの報告先について。">
+  <main id="main" class="page">
+    <h1>このサイトについて</h1>
+    <div class="prose">
+      <p>
+        「ゼロからの集合論」は、高校生が大学1〜2年で学ぶ集合論を、<strong>独学で・無料で・基礎から</strong>学べるように作った教材サイトです。広告・会員登録・課金は一切ありません。
+      </p>
+
+      <h2 id="goal">到達目標</h2>
+      <p>
+        集合と論理の基礎から始め、写像・関係・順序・無限集合の濃度を理解する。さらにカントールの定理、カントール＝ベルンシュタイン＝シュレーダーの定理、選択公理の基本的な意味と、整列可能定理・ツォルンの補題との関係を学ぶ。
+      </p>
+      <p>
+        公理的集合論（ZFC の公理から順序数・基数を組み立てる理論）は、<a href={chapterUrl('choice')}>第10章</a>で概観するにとどめています。選択公理・整列可能定理・ツォルンの補題の同値性は、主張と意味の理解までを扱い、証明は扱いません。
+      </p>
+
+      <h2 id="progress">学習記録</h2>
+      <p>
+        「読み終えた」と確認問題の結果（各問題の最新の正誤）は、<strong>このブラウザの中だけ</strong>に保存されます。サーバーには送信されず、別の端末やブラウザとは自動では同期されません。ブラウザのデータを消去すると、記録も消えます。
+      </p>
+    </div>
+
+    <section class="panel" aria-labelledby="panel-title">
+      <h3 id="panel-title">記録の管理</h3>
+      <p class="panel-summary" data-summary>読み込み中…</p>
+      <p class="panel-warn" data-unavailable hidden>このブラウザでは学習記録を保存できません（プライベートブラウズなど）。本文と問題はそのまま使えます。</p>
+      <div class="panel-actions">
+        <button type="button" class="btn" data-export>記録を書き出す（JSON）</button>
+        <label class="btn">
+          記録を読み込む
+          <input type="file" accept="application/json,.json" class="visually-hidden" data-import />
+        </label>
+        <button type="button" class="btn btn-danger" data-reset>記録をすべて消す</button>
+      </div>
+      <p class="panel-msg" data-msg role="status" aria-live="polite"></p>
+      <p class="panel-note">読み込むと、いまの記録は<strong>すべて置き換わります</strong>（足し合わせはしません）。読み込む前に確認画面が出ます。</p>
+    </section>
+
+    <div class="prose">
+      <h2 id="feedback">誤りの報告・ご意見</h2>
+      <p>
+        数学的な誤り、分かりにくい説明、表示の不具合などに気づいたら、<a href="https://github.com/taka2360/set-theory/issues" rel="noopener">GitHub の Issues</a> でお知らせください。教材は随時改善していきます。
+      </p>
+
+      <h2 id="license">ライセンス</h2>
+      <p>
+        本文は <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ja" rel="license noopener">クリエイティブ・コモンズ 表示-継承 4.0（CC BY-SA 4.0）</a>、ソースコードは MIT ライセンスで公開しています。授業や勉強会でも自由に使えます。
+      </p>
+
+      <h2 id="tech">技術について</h2>
+      <p>
+        Astro による静的サイトで、数式は KaTeX でビルド時に描画しています。インタラクティブな図は Preact で必要な部分だけ読み込み、検索は Pagefind を使っています。GitHub Pages で公開しています。
+      </p>
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  import { progressStore } from '../lib/progress';
+
+  const store = progressStore();
+  const summary = document.querySelector<HTMLElement>('[data-summary]')!;
+  const msg = document.querySelector<HTMLElement>('[data-msg]')!;
+
+  const render = () => {
+    const chapters = Object.values(store.get().chapters);
+    const read = chapters.filter((c) => c.read).length;
+    const answers = chapters.flatMap((c) => Object.values(c.quiz));
+    const correct = answers.filter(Boolean).length;
+    summary.textContent =
+      chapters.length === 0 ? 'まだ記録はありません。' : `読了 ${read} 章・回答済み ${answers.length} 問・正解 ${correct} 問（回答済み問題の正答率 ${answers.length ? Math.round((correct / answers.length) * 100) : 0}%）`;
+    document.querySelector<HTMLElement>('[data-unavailable]')!.hidden = store.available;
+  };
+  render();
+  store.subscribe(render);
+
+  document.querySelector('[data-export]')!.addEventListener('click', () => {
+    const blob = new Blob([store.exportJson()], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `set-theory-progress-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    msg.textContent = '記録を書き出しました。';
+  });
+
+  document.querySelector<HTMLInputElement>('[data-import]')!.addEventListener('change', async (e) => {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (file.size > 1_000_000) {
+      msg.textContent = 'ファイルが大きすぎます。書き出した記録ファイルを選んでください。';
+      return;
+    }
+    const text = await file.text();
+    if (!confirm('いまの記録をすべて、このファイルの内容で置き換えます。よろしいですか？')) return;
+    const result = store.importJson(text);
+    msg.textContent = result.ok ? '記録を読み込みました。' : `読み込めませんでした：${result.error}`;
+  });
+
+  document.querySelector('[data-reset]')!.addEventListener('click', () => {
+    if (!confirm('学習記録をすべて消します。元に戻せません。よろしいですか？')) return;
+    store.reset();
+    msg.textContent = '記録を消しました。';
+  });
+</script>
+
+<style>
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2.5rem 16px 0;
+  }
+
+  h1 {
+    margin: 0 0 1.5rem;
+    font-size: clamp(1.8rem, 1.4rem + 1.5vw, 2.4rem);
+  }
+
+  .prose {
+    margin-top: 0;
+  }
+
+  .panel {
+    margin: 1.5rem 0 1rem;
+    padding: 1.2rem 1.4rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+
+  .panel h3 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  .panel-summary {
+    margin: 0.4rem 0 0.8rem;
+    font-weight: 600;
+  }
+
+  .panel-warn {
+    color: var(--pit);
+    font-size: 0.9rem;
+  }
+
+  .panel-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .btn-danger {
+    color: var(--ng);
+  }
+
+  .btn-danger:hover {
+    border-color: var(--ng);
+  }
+
+  .panel-msg {
+    min-height: 1.5em;
+    margin: 0.6rem 0 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .panel-note {
+    margin: 0.2rem 0 0;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+</style>

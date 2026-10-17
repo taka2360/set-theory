@@ -1,5 +1,379 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Roadmap from '../components/Roadmap.astro';
+import { getChapters } from '../lib/chapters';
+import { inlineMath } from '../lib/inlineMath';
+import { chapterUrl, withBase } from '../lib/url';
+
+const chapters = await getChapters();
+const resumeData = chapters.map((c) => ({ key: c.data.chapterKey, url: chapterUrl(c.data.slug), label: `${c.data.order === 0 ? '序章' : `第${c.data.order}章`} ${c.data.title}` }));
+const heroFormula = inlineMath('$\\lvert \\mathbb{N} \\rvert < \\lvert \\mathbb{R} \\rvert < \\lvert \\mathcal{P}(\\mathbb{R}) \\rvert < \\cdots$');
+const features = [
+  {
+    icon: '¥0',
+    title: '完全無料・登録不要',
+    text: '広告もアカウントもありません。スマホでもPCでも、開いたその瞬間から学べます。',
+  },
+  {
+    icon: 'A∩B',
+    title: '触って分かる',
+    text: 'ベン図、写像、ヒルベルトホテル、対角線論法。抽象的な概念を、自分の手で動かして確かめられます。',
+  },
+  {
+    icon: '∎',
+    title: '証明が書けるようになる',
+    text: '「要素を1つ取る」「両方向の包含」など、証明の型を名前付きで解説。解説付きの確認問題と3段階の演習で定着させます。',
+  },
+  {
+    icon: '✓',
+    title: '自分のペースで',
+    text: '読了と正答の記録はこのブラウザだけに保存。どこまで進んだか、いつでも確認できます。',
+  },
+];
 ---
 
-<BaseLayout title="ゼロからの集合論"><main id="main"><p>準備中</p></main></BaseLayout>
+<BaseLayout title="ゼロからの集合論">
+  <main id="main">
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-text">
+          <p class="hero-kicker"><span class="chip">高校生のための大学数学</span></p>
+          <h1>
+            <span class="nb">無限の大きさを、</span><br /><span class="nb grad">自分の手で</span><span class="nb grad">証明する。</span>
+          </h1>
+          <p class="hero-lead">
+            集合・論理・写像から、カントールの対角線論法、選択公理まで。<br class="pc" />大学1〜2年で学ぶ集合論を、高校数学の知識だけで、基礎から一歩ずつ。
+          </p>
+          <div class="hero-cta">
+            <a class="btn btn-primary btn-lg" href={chapterUrl('intro')} data-resume>はじめる</a>
+            <a class="btn btn-lg" href="#roadmap">目次を見る</a>
+          </div>
+          <p class="hero-note">完全無料・登録不要・全11章</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <svg viewBox="0 0 400 360" class="hero-svg">
+            <defs>
+              <radialGradient id="hg1" cx="35%" cy="35%" r="70%">
+                <stop offset="0" stop-color="var(--accent)" stop-opacity="0.55"></stop>
+                <stop offset="1" stop-color="var(--accent)" stop-opacity="0.08"></stop>
+              </radialGradient>
+              <radialGradient id="hg2" cx="65%" cy="35%" r="70%">
+                <stop offset="0" stop-color="var(--thm)" stop-opacity="0.5"></stop>
+                <stop offset="1" stop-color="var(--thm)" stop-opacity="0.06"></stop>
+              </radialGradient>
+              <radialGradient id="hg3" cx="50%" cy="70%" r="70%">
+                <stop offset="0" stop-color="var(--idea)" stop-opacity="0.45"></stop>
+                <stop offset="1" stop-color="var(--idea)" stop-opacity="0.05"></stop>
+              </radialGradient>
+            </defs>
+            <g class="orbit">
+              <circle cx="155" cy="140" r="105" fill="url(#hg1)" stroke="var(--accent)" stroke-width="1.5"></circle>
+              <circle cx="245" cy="140" r="105" fill="url(#hg2)" stroke="var(--thm)" stroke-width="1.5"></circle>
+              <circle cx="200" cy="218" r="105" fill="url(#hg3)" stroke="var(--idea)" stroke-width="1.5"></circle>
+            </g>
+            <g font-family="KaTeX_Math, Times New Roman, serif" font-style="italic" font-size="26" fill="var(--ink)">
+              <text x="92" y="100">A</text>
+              <text x="292" y="100">B</text>
+              <text x="192" y="318">C</text>
+            </g>
+            <g font-family="KaTeX_Main, Times New Roman, serif" font-size="15" fill="var(--ink-2)" class="digits">
+              <text x="160" y="160">0.<tspan font-weight="700" fill="var(--accent)">1</tspan> 4 1 5 …</text>
+              <text x="160" y="180">0.5 <tspan font-weight="700" fill="var(--accent)">0</tspan> 0 0 …</text>
+              <text x="160" y="200">0.3 3 <tspan font-weight="700" fill="var(--accent)">3</tspan> 3 …</text>
+            </g>
+          </svg>
+          <div class="hero-formula" set:html={heroFormula} />
+        </div>
+      </div>
+    </section>
+
+    <section class="features" aria-label="このサイトの特長">
+      <div class="container features-grid">
+        {
+          features.map((f) => (
+            <div class="feature">
+              <span class="feature-icon">{f.icon}</span>
+              <h2 class="feature-title">{f.title}</h2>
+              <p>{f.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="goal container" aria-labelledby="goal-title">
+      <div class="goal-card">
+        <h2 id="goal-title">このサイトの到達目標</h2>
+        <p>
+          集合と論理の基礎から始め、写像・関係・順序・無限集合の濃度を理解する。さらにカントールの定理、カントール＝ベルンシュタイン＝シュレーダーの定理、選択公理の基本的な意味と、整列可能定理・ツォルンの補題との関係を学ぶ。
+        </p>
+        <p class="goal-sub">公理的集合論（ZFC の公理から順序数・基数を組み立てる理論）は最終章で概観するにとどめ、その先の学習案内を用意しています。</p>
+      </div>
+    </section>
+
+    <section id="roadmap" class="container roadmap-section" aria-labelledby="roadmap-title">
+      <h2 id="roadmap-title" class="section-title">学習ロードマップ</h2>
+      <p class="section-lead">各章の「前提」は、先に読んでおくとよい章の番号です。上から順に進めば、前提は必ず満たされます。</p>
+      <Roadmap chapters={chapters} />
+    </section>
+
+    <section class="container final-cta">
+      <h2>さあ、無限の旅へ。</h2>
+      <p>必要なのは、高校数学と、一歩ずつ考える根気だけです。</p>
+      <a class="btn btn-primary btn-lg" href={chapterUrl('sets')}>第1章「集合とは」から始める</a>
+      <p class="final-links"><a href={withBase('glossary/')}>用語・記号の一覧</a> ・ <a href={withBase('about/')}>このサイトについて</a></p>
+    </section>
+  </main>
+</BaseLayout>
+
+<script define:vars={{ resumeData }}>
+  // 読了していない最初の章へ「続きから」案内する
+  try {
+    const raw = localStorage.getItem('setTheory:v1');
+    const data = raw ? JSON.parse(raw) : null;
+    const chapters = (data && data.chapters) || {};
+    const started = resumeData.some((c) => chapters[c.key] && (chapters[c.key].read || Object.keys(chapters[c.key].quiz || {}).length));
+    const next = resumeData.find((c) => !(chapters[c.key] && chapters[c.key].read));
+    const btn = document.querySelector('[data-resume]');
+    if (btn && started && next) {
+      btn.textContent = `続きから：${next.label}`;
+      btn.setAttribute('href', next.url);
+    }
+  } catch {}
+</script>
+
+<style>
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+    background:
+      radial-gradient(60rem 30rem at 85% -10%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%),
+      radial-gradient(40rem 24rem at -10% 110%, color-mix(in srgb, var(--thm) 12%, transparent), transparent 70%);
+  }
+
+  .hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 72px 16px 80px;
+  }
+
+  .hero h1 {
+    margin: 0.8rem 0 1rem;
+    font-size: clamp(2rem, 1.2rem + 3.6vw, 3.4rem);
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+  }
+
+  .nb {
+    display: inline-block;
+  }
+
+  .grad {
+    background: linear-gradient(90deg, var(--accent), var(--thm) 60%, var(--idea));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hero-lead {
+    margin: 0;
+    font-size: 1.08rem;
+    color: var(--ink-2);
+  }
+
+  .hero-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 1.8rem;
+  }
+
+  .btn-lg {
+    min-height: 52px;
+    padding: 0.7em 1.6em;
+    font-size: 1rem;
+  }
+
+  .hero-note {
+    margin: 0.9rem 0 0;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .hero-art {
+    position: relative;
+    text-align: center;
+  }
+
+  .hero-svg {
+    width: 100%;
+    max-width: 420px;
+    height: auto;
+    overflow: visible;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .orbit circle {
+      transform-origin: 200px 170px;
+      animation: float 9s ease-in-out infinite;
+    }
+
+    .orbit circle:nth-child(2) {
+      animation-delay: -3s;
+    }
+
+    .orbit circle:nth-child(3) {
+      animation-delay: -6s;
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+
+    50% {
+      transform: translate(0, -8px);
+    }
+  }
+
+  .hero-formula {
+    margin-top: -0.5rem;
+    font-size: clamp(1.1rem, 0.9rem + 1vw, 1.5rem);
+    color: var(--ink);
+  }
+
+  .pc {
+    display: inline;
+  }
+
+  @media (max-width: 860px) {
+    .hero-inner {
+      grid-template-columns: 1fr;
+      padding: 44px 16px 52px;
+    }
+
+    .hero-art {
+      order: -1;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    .pc {
+      display: none;
+    }
+  }
+
+  .features {
+    padding: 56px 0 24px;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+    gap: 16px;
+  }
+
+  .feature {
+    padding: 1.3rem 1.3rem 1rem;
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+
+  .feature-icon {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.6rem;
+    height: 2.6rem;
+    padding: 0 0.5rem;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    font-family: 'KaTeX_Main', 'Times New Roman', serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+
+  .feature-title {
+    margin: 0.8rem 0 0.3rem;
+    font-size: 1.05rem;
+  }
+
+  .feature p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ink-2);
+    line-height: 1.75;
+  }
+
+  .goal {
+    padding-top: 32px;
+  }
+
+  .goal-card {
+    padding: 1.6rem 1.8rem;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--accent-soft), color-mix(in srgb, var(--thm-bg) 70%, transparent));
+  }
+
+  .goal-card h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.15rem;
+  }
+
+  .goal-card p {
+    margin: 0;
+  }
+
+  .goal-sub {
+    margin-top: 0.6rem !important;
+    font-size: 0.88rem;
+    color: var(--ink-2);
+  }
+
+  .roadmap-section {
+    padding-top: 72px;
+  }
+
+  .section-title {
+    margin: 0;
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  }
+
+  .section-lead {
+    margin: 0.4rem 0 2rem;
+    color: var(--ink-2);
+  }
+
+  .final-cta {
+    padding-top: 80px;
+    text-align: center;
+  }
+
+  .final-cta h2 {
+    margin: 0;
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  }
+
+  .final-cta p {
+    color: var(--ink-2);
+  }
+
+  .final-links {
+    margin-top: 1.4rem;
+    font-size: 0.9rem;
+  }
+</style>

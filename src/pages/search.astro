@@ -1,0 +1,128 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/url';
+
+const examples = ['部分集合', '空集合', '対角線論法', '選択公理', '∀'];
+---
+
+<BaseLayout title="検索" description="ゼロからの集合論の全文検索。用語や記号で、各章の本文を検索できます。">
+  <link slot="head" rel="stylesheet" href={withBase('pagefind/pagefind-ui.css')} />
+  <main id="main" class="page">
+    <h1>検索</h1>
+    <p class="lead">用語（例：部分集合）や記号（例：∀）で、すべての章の本文と用語集を検索できます。</p>
+    <div id="search" data-pagefind-ui data-base={withBase('pagefind/')}></div>
+    <noscript><p>検索には JavaScript が必要です。<a href={withBase('glossary/')}>用語・記号の一覧</a>もご利用ください。</p></noscript>
+    <div class="examples">
+      <span>例：</span>
+      {
+        examples.map((q) => (
+          <button type="button" class="chip" data-example={q}>
+            {q}
+          </button>
+        ))
+      }
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  declare global {
+    interface Window {
+      PagefindUI?: new (opts: Record<string, unknown>) => { triggerSearch: (q: string) => void };
+    }
+  }
+
+  const el = document.querySelector<HTMLElement>('[data-pagefind-ui]')!;
+  const base = el.dataset.base!;
+
+  function start() {
+    if (!window.PagefindUI) {
+      el.innerHTML = '<p class="search-error">検索の準備ができませんでした（npm run build でインデックスを作ると使えます）。</p>';
+      return;
+    }
+    const ui = new window.PagefindUI({
+      element: '#search',
+      bundlePath: base,
+      showSubResults: true,
+      showImages: false,
+      resetStyles: false,
+      autofocus: true,
+      translations: { placeholder: 'キーワードを入力（例：部分集合、∀）', zero_results: '「[SEARCH_TERM]」に一致する結果はありませんでした', clear_search: 'クリア', load_more: 'さらに表示' },
+    });
+    const q = new URLSearchParams(location.search).get('q');
+    if (q) ui.triggerSearch(q);
+    document.querySelectorAll<HTMLButtonElement>('[data-example]').forEach((b) =>
+      b.addEventListener('click', () => {
+        ui.triggerSearch(b.dataset.example!);
+        const url = new URL(location.href);
+        url.searchParams.set('q', b.dataset.example!);
+        history.replaceState(null, '', url);
+      }),
+    );
+  }
+
+  const s = document.createElement('script');
+  s.src = `${base}pagefind-ui.js`;
+  s.onload = start;
+  s.onerror = start;
+  document.head.append(s);
+</script>
+
+<style>
+  .page {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 2.5rem 16px 0;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.8rem, 1.4rem + 1.5vw, 2.4rem);
+  }
+
+  .lead {
+    margin: 0.5rem 0 1.5rem;
+    color: var(--ink-2);
+  }
+
+  .examples {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .examples .chip {
+    border: 0;
+    cursor: pointer;
+    font-size: 0.82rem;
+  }
+
+  #search {
+    --pagefind-ui-scale: 0.95;
+    --pagefind-ui-primary: var(--accent);
+    --pagefind-ui-text: var(--ink);
+    --pagefind-ui-background: var(--surface);
+    --pagefind-ui-border: var(--line-strong);
+    --pagefind-ui-tag: var(--accent-soft);
+    --pagefind-ui-border-width: 1.5px;
+    --pagefind-ui-border-radius: 12px;
+    --pagefind-ui-font: var(--font-body);
+  }
+
+  #search :global(.pagefind-ui__result-link) {
+    color: var(--accent-ink);
+  }
+
+  #search :global(mark) {
+    background: color-mix(in srgb, var(--accent) 25%, transparent);
+    color: inherit;
+  }
+
+  :global(.search-error) {
+    color: var(--muted);
+  }
+</style>
