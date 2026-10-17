@@ -1,0 +1,181 @@
+.hotel {
+  --room: min(7vw, 52px);
+  margin: 2rem 0;
+  padding: 1rem 1.15rem 1.1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  line-height: 1.6;
+}
+
+.hotel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.hotel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  margin: 0;
+  font-family: var(--font-head);
+  font-weight: 700;
+}
+
+.hotel-badge {
+  font-size: 0.75rem;
+  padding: 0.1em 0.6em;
+  border-radius: 999px;
+  background: var(--pit-bg);
+  color: var(--pit);
+}
+
+.hotel-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--bg);
+}
+
+.hotel-tabs button {
+  border: 0;
+  min-height: 34px;
+  padding: 0.2em 0.9em;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hotel-tabs button[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--accent-ink);
+  box-shadow: var(--shadow);
+}
+
+.hotel-scene {
+  margin: 0.7rem 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.hotel-stage {
+  position: relative;
+  overflow: hidden;
+  padding: 2.6rem 0 0.4rem;
+}
+
+.hotel-rooms {
+  display: flex;
+  gap: 4px;
+}
+
+.hotel-room {
+  flex: none;
+  width: var(--room);
+  height: calc(var(--room) * 1.25);
+  border-radius: 8px 8px 2px 2px;
+  background: var(--bg-elev);
+  border: 1.5px solid var(--line-strong);
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.hotel-door {
+  position: absolute;
+  inset: 18% 22% 0;
+  border-radius: 6px 6px 0 0;
+  background: var(--accent-soft);
+}
+
+.hotel-no {
+  position: relative;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.hotel-more {
+  align-self: center;
+  padding-left: 4px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.hotel-guests {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hotel-guest {
+  position: absolute;
+  top: calc(2.6rem + var(--room) * 0.18);
+  left: calc((var(--pos) - 1) * (var(--room) + 4px) + var(--room) * 0.5);
+  transform: translateX(-50%);
+  min-width: calc(var(--room) * 0.62);
+  height: calc(var(--room) * 0.62);
+  padding: 0 3px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  transition:
+    left 0.9s cubic-bezier(0.5, 0, 0.2, 1),
+    top 0.9s cubic-bezier(0.5, 0, 0.2, 1),
+    opacity 0.5s;
+}
+
+.hotel-guest.is-new {
+  background: var(--idea);
+}
+
+/* 位置 0（まだホテルの外）の新しい客は、上空で待機 */
+.hotel-guest.is-off {
+  opacity: 0;
+}
+
+.hotel-guest.is-new.is-off {
+  opacity: 1;
+  top: 0.2rem;
+  left: calc((var(--wait) - 1) * (var(--room) + 4px) + var(--room) * 0.5);
+}
+
+.hotel-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  margin-top: 0.8rem;
+}
+
+.hotel-rule {
+  flex: 1 1 16rem;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.hotel-caveat {
+  margin: 0.8rem 0 0;
+  padding: 0.55rem 0.8rem;
+  border-radius: var(--radius-sm);
+  background: var(--pit-bg);
+  color: var(--ink-2);
+  font-size: 0.82rem;
+}
+
+.hotel-caveat strong {
+  color: var(--pit);
+}

@@ -1,0 +1,375 @@
+---
+title: 集合の演算
+slug: operations
+chapterKey: operations-basics-v1
+order: 3
+part: 集合と論理
+summary: 和集合・共通部分・差・補集合の性質を、要素を使ってきちんと証明します。冪集合・直積・集合族も導入します。
+goals:
+  - 和集合・共通部分・差集合・補集合を定義に従って扱える
+  - 分配法則やド・モルガンの法則を、要素を1つ取る方法で証明できる
+  - 冪集合と直積を求め、要素の個数を数えられる
+  - 添字付きの集合族の和集合・共通部分を読める
+prereq: [sets, logic]
+minutes: 55
+---
+
+import VennPlayground from '../../components/interactive/VennPlayground.tsx';
+
+## 4つの基本演算
+
+第1章で高校の復習として見た演算を、第2章の論理の言葉で定義し直します。
+
+<Definition label="定義 3.1" title="和集合・共通部分・差集合">
+集合 $A, B$ に対して、
+
+$$
+\begin{aligned}
+A \cup B &= \{\, x \mid x \in A \lor x \in B \,\} &&\text{（和集合）}\\
+A \cap B &= \{\, x \mid x \in A \land x \in B \,\} &&\text{（共通部分）}\\
+A \setminus B &= \{\, x \mid x \in A \land x \notin B \,\} &&\text{（差集合）}
+\end{aligned}
+$$
+</Definition>
+
+$A \cap B = \varnothing$ のとき、$A$ と $B$ は**互いに素**（または交わらない）といいます。
+
+<Definition label="定義 3.2" title="補集合">
+全体集合 $U$ を1つ決めておき、その部分集合 $A$ に対して
+
+$$
+A^c = U \setminus A = \{\, x \in U \mid x \notin A \,\}
+$$
+
+を $A$ の**補集合**といいます。
+</Definition>
+
+<Pitfall title="補集合は全体集合しだい">
+$A = \{1, 2\}$ の補集合は、全体集合 $U$ を決めないと決まりません。$U = \{1, 2, 3\}$ なら $A^c = \{3\}$、$U = \mathbb{N}$ なら $A^c = \{3, 4, 5, \dots\}$ です。補集合を使うときは、**全体集合が何か**を必ず確認しましょう。差集合 $A \setminus B$ は全体集合なしで定義できるので、大学の本では補集合より差集合がよく使われます。
+</Pitfall>
+
+<Example>
+$U = \{1, 2, \dots, 10\}$、$A = \{1, 2, 3, 4\}$、$B = \{3, 4, 5, 6\}$ とすると、
+
+- $A \cup B = \{1, 2, 3, 4, 5, 6\}$
+- $A \cap B = \{3, 4\}$
+- $A \setminus B = \{1, 2\}$、$B \setminus A = \{5, 6\}$（$A \setminus B \ne B \setminus A$ に注意）
+- $A^c = \{5, 6, 7, 8, 9, 10\}$
+</Example>
+
+## 演算の法則
+
+<Theorem label="定理 3.3" title="基本法則">
+集合 $A, B, C$ について、次が成り立つ。
+
+1. **交換法則**：$A \cup B = B \cup A$、$A \cap B = B \cap A$
+2. **結合法則**：$(A \cup B) \cup C = A \cup (B \cup C)$、$(A \cap B) \cap C = A \cap (B \cap C)$
+3. **分配法則**：$A \cap (B \cup C) = (A \cap B) \cup (A \cap C)$、$A \cup (B \cap C) = (A \cup B) \cap (A \cup C)$
+4. **吸収法則**：$A \cup (A \cap B) = A$、$A \cap (A \cup B) = A$
+5. $A \cap B \subseteq A \subseteq A \cup B$
+</Theorem>
+
+これらはすべて、第1章の「**両方向の包含**」で証明できます。代表として分配法則の1つ目を証明します。
+
+<Proof title="分配法則 $A \cap (B \cup C) = (A \cap B) \cup (A \cap C)$ の証明">
+**（$\subseteq$）** $x \in A \cap (B \cup C)$ とします。すると $x \in A$ かつ $x \in B \cup C$ です。後者から $x \in B$ または $x \in C$ です。
+
+- $x \in B$ のとき、$x \in A$ と合わせて $x \in A \cap B$。
+- $x \in C$ のとき、$x \in A$ と合わせて $x \in A \cap C$。
+
+どちらの場合も $x \in (A \cap B) \cup (A \cap C)$ です。
+
+**（$\supseteq$）** $x \in (A \cap B) \cup (A \cap C)$ とします。すると $x \in A \cap B$ または $x \in A \cap C$ です。
+
+- $x \in A \cap B$ のとき、$x \in A$ かつ $x \in B$。$x \in B$ から $x \in B \cup C$。
+- $x \in A \cap C$ のとき、$x \in A$ かつ $x \in C$。$x \in C$ から $x \in B \cup C$。
+
+どちらの場合も $x \in A$ かつ $x \in B \cup C$、つまり $x \in A \cap (B \cup C)$ です。
+
+両方向の包含が示せたので、等式が成り立ちます。
+</Proof>
+
+「$x \in B$ または $x \in C$」のような「または」が出てきたら、**場合分け**をするのが定石です。
+
+<Theorem label="定理 3.4" title="ド・モルガンの法則（集合）">
+全体集合 $U$ の部分集合 $A, B$ について、
+
+$$
+(A \cup B)^c = A^c \cap B^c, \qquad (A \cap B)^c = A^c \cup B^c
+$$
+</Theorem>
+
+<Proof>
+1 つ目を示します。$x \in U$ について、
+
+$$
+\begin{aligned}
+x \in (A \cup B)^c
+&\iff \lnot(x \in A \lor x \in B) \\
+&\iff (x \notin A) \land (x \notin B) &&\text{（論理のド・モルガンの法則）}\\
+&\iff x \in A^c \land x \in B^c \\
+&\iff x \in A^c \cap B^c
+\end{aligned}
+$$
+
+すべて $\iff$ でつながっているので、両方向の包含が一度に示せています。2 つ目も同様です（演習問題 3.2）。
+</Proof>
+
+このように、各行が「同値」でつながる場合は、両方向をまとめて書くことができます。ただし、**本当にすべての行が同値か**を確認する必要があります。1 行でも「$\Rightarrow$」しか成り立たない行があれば、片方向しか示せていません。
+
+### ベン図で確かめられる理由
+
+第1章のベン図の入力欄では、「2つの式が同じ部分を塗れば、その2つの集合は等しい」と言いました。その理由を説明します。
+
+3つの集合 $A, B, C$ のベン図は 8 つの部分に分かれます。それぞれの部分は「$A$ に属するか」「$B$ に属するか」「$C$ に属するか」の組み合わせ（$2^3 = 8$ 通り）に対応しています。
+
+集合の式（$\cup, \cap, \setminus, {}^c$ だけを使ったもの）に要素 $x$ が属するかどうかは、$x$ が $A, B, C$ のそれぞれに属するかどうかだけで決まります。そのため、**8 つの部分すべてで塗り方が一致すれば、どんな要素についても「属するかどうか」が一致**し、2つの集合は等しくなります。これは真理値表で 8 行すべてを確かめるのと同じことです。
+
+<VennPlayground
+  client:visible
+  initial="A ∩ (B ∪ C)"
+  sets={3}
+  challenges={[
+    { target: '(A ∩ B) ∪ (A ∩ C)', prompt: '左の図は A ∩ (B ∪ C) です。分配法則を使って、∪ を外側にした式で書いてみよう。' },
+    { target: 'Aᶜ ∩ Bᶜ ∩ Cᶜ', prompt: '(A ∪ B ∪ C)ᶜ と同じ部分を、補集合と ∩ だけで書いてみよう（ド・モルガンの法則）。' },
+    { target: '(A ∩ B) \\ C', prompt: 'A と B の両方に属するが C には属さない部分は？' },
+    { target: '(A △ B) △ C', prompt: 'A, B, C のうち、ちょうど1つ、またはちょうど3つに属する部分です。△（対称差）を使って書けるかな？' },
+  ]}
+/>
+
+<Quiz id="operations-q01">
+$A = \{1, 2, 3\}$、$B = \{2, 3, 4\}$、$C = \{3, 4, 5\}$ のとき、$(A \setminus B) \cup (B \cap C)$ は？
+
+<Choice>$\{1, 3\}$</Choice>
+<Choice correct>$\{1, 3, 4\}$</Choice>
+<Choice>$\{1, 2, 3, 4\}$</Choice>
+<Choice>$\{3, 4\}$</Choice>
+
+<Explain>
+$A \setminus B = \{1\}$（$A$ のうち $B$ に入っていないもの）、$B \cap C = \{3, 4\}$ なので、和集合は $\{1, 3, 4\}$ です。
+</Explain>
+</Quiz>
+
+<Quiz id="operations-q02">
+どんな集合 $A, B$ についても成り立つものはどれ？
+
+<Choice>$A \setminus B = B \setminus A$</Choice>
+<Choice>$(A \cup B) \setminus B = A$</Choice>
+<Choice correct>$A \setminus (A \setminus B) = A \cap B$</Choice>
+<Choice>$A \cup (B \setminus A) = B$</Choice>
+
+<Explain>
+$x \in A \setminus (A \setminus B)$ は「$x \in A$ かつ、$x \in A$ かつ $x \notin B$ ではない」で、整理すると「$x \in A$ かつ $x \in B$」です。2 番目は $(A \cup B) \setminus B = A \setminus B$ なので、$A$ と $B$ が交わると成り立ちません（$A = B = \{1\}$ が反例）。4 番目は $A \cup (B \setminus A) = A \cup B$ です。
+</Explain>
+</Quiz>
+
+## 冪集合
+
+<Definition label="定義 3.5" title="冪集合">
+集合 $A$ の部分集合全体の集合を $A$ の**冪集合**（べきしゅうごう）といい、$\mathcal{P}(A)$ で表します。
+
+$$
+\mathcal{P}(A) = \{\, X \mid X \subseteq A \,\}
+$$
+</Definition>
+
+<Example>
+$$
+\mathcal{P}(\{1, 2\}) = \{\varnothing, \{1\}, \{2\}, \{1, 2\}\}, \qquad \mathcal{P}(\varnothing) = \{\varnothing\}
+$$
+
+$\mathcal{P}(\varnothing)$ は空集合ではなく、$\varnothing$ を1つだけ要素に持つ集合です（$\varnothing \subseteq \varnothing$ なので）。
+</Example>
+
+$X \in \mathcal{P}(A)$ と $X \subseteq A$ は同じ意味です。冪集合を考えると、「部分集合」という関係を「要素」という関係に言いかえられます。
+
+<Theorem label="定理 3.6">
+$A$ が $n$ 個の要素を持つ有限集合ならば、$\mathcal{P}(A)$ は $2^n$ 個の要素を持つ。
+</Theorem>
+
+<Proof>
+$n$ についての数学的帰納法で示します。
+
+**基礎：** $n = 0$ のとき、$A = \varnothing$ で $\mathcal{P}(A) = \{\varnothing\}$ は $1 = 2^0$ 個の要素を持ちます。
+
+**帰納段階：** 要素が $k$ 個の集合の冪集合は $2^k$ 個の要素を持つと仮定します。要素が $k + 1$ 個の集合 $A$ を取り、その要素を1つ選んで $a$ とし、$A' = A \setminus \{a\}$ とします（$A'$ の要素は $k$ 個）。
+
+$A$ の部分集合は、$a$ を含まないものと含むものに分けられます。
+
+- $a$ を含まない部分集合は、ちょうど $A'$ の部分集合で、仮定より $2^k$ 個。
+- $a$ を含む部分集合は、$A'$ の部分集合 $Y$ に $a$ を加えた $Y \cup \{a\}$ の形で、$Y$ と 1 対 1 に対応するので $2^k$ 個。
+
+合計 $2^k + 2^k = 2^{k+1}$ 個です。
+</Proof>
+
+第8章では、$A$ が無限集合でも「$\mathcal{P}(A)$ は $A$ より真に大きい」ことを証明します。冪集合は、大きな無限を作り出す装置なのです。
+
+## 直積
+
+<Definition label="定義 3.7" title="順序対と直積">
+2つのもの $a, b$ を順番を区別して組にしたものを**順序対**といい、$(a, b)$ と書きます。$(a, b) = (c, d)$ となるのは、$a = c$ かつ $b = d$ のときに限ります。
+
+集合 $A, B$ に対して、$A$ の要素と $B$ の要素の順序対全体の集合
+
+$$
+A \times B = \{\, (a, b) \mid a \in A,\ b \in B \,\}
+$$
+
+を $A$ と $B$ の**直積**といいます。
+</Definition>
+
+<Example>
+$A = \{1, 2\}$、$B = \{x, y, z\}$ のとき
+
+$$
+A \times B = \{(1, x), (1, y), (1, z), (2, x), (2, y), (2, z)\}
+$$
+
+で、要素は $2 \times 3 = 6$ 個です。座標平面 $\mathbb{R}^2 = \mathbb{R} \times \mathbb{R}$ は、実数の順序対全体です。
+</Example>
+
+<Pitfall title="順序対と集合は違う">
+集合では $\{1, 2\} = \{2, 1\}$ ですが、順序対では $(1, 2) \ne (2, 1)$ です。また $\{1, 1\} = \{1\}$ ですが、$(1, 1)$ はれっきとした順序対です。直積も一般に $A \times B \ne B \times A$ です。
+</Pitfall>
+
+<Note title="順序対も集合で作れる">
+「順番を区別する組」は新しい概念のように見えますが、実は $(a, b) = \{\{a\}, \{a, b\}\}$ と定義すると、集合だけで作れます（クラトフスキーの定義）。こう定義すると「$(a, b) = (c, d) \iff a = c \land b = d$」が証明できます。数学のあらゆる対象を集合で作れる、という考え方の一例です。
+</Note>
+
+<Quiz id="operations-q03">
+$A = \{1, 2, 3\}$ のとき、$\mathcal{P}(A)$ と $A \times A$ の要素の個数の組は？
+
+<Choice>3 個と 9 個</Choice>
+<Choice>8 個と 6 個</Choice>
+<Choice correct>8 個と 9 個</Choice>
+<Choice>9 個と 8 個</Choice>
+
+<Explain>
+$\mathcal{P}(A)$ の要素の個数は $2^3 = 8$、$A \times A$ の要素の個数は $3 \times 3 = 9$ です。$A \times A$ には $(1, 1)$ のような同じ要素の組や、$(1, 2)$ と $(2, 1)$ の両方が含まれます。
+</Explain>
+</Quiz>
+
+## 集合族
+
+たくさんの集合をまとめて扱うことがよくあります。
+
+<Definition label="定義 3.8" title="集合族の和集合と共通部分">
+集合 $I$ の各要素 $i$ に対して集合 $A_i$ が与えられているとき、$(A_i)_{i \in I}$ を $I$ で添字付けられた**集合族**といいます。$I$ を**添字集合**といいます。
+
+$$
+\bigcup_{i \in I} A_i = \{\, x \mid \exists i \in I\ (x \in A_i) \,\}, \qquad \bigcap_{i \in I} A_i = \{\, x \mid \forall i \in I\ (x \in A_i) \,\}
+$$
+
+（$\bigcap$ は $I \ne \varnothing$ のときに考えます。）
+</Definition>
+
+「少なくとも1つの $A_i$ に属する」が和集合、「すべての $A_i$ に属する」が共通部分です。$\exists$ と $\forall$ がそのまま現れています。
+
+<Example title="無限個の集合の和と共通部分">
+自然数 $n$ に対して、区間 $A_n = \left[\tfrac{1}{n},\ 1\right]$ を考えます。$A_1 = \{1\}$、$A_2 = [\tfrac12, 1]$、$A_3 = [\tfrac13, 1]$、……と、だんだん広がっていきます。
+
+$$
+\bigcup_{n \in \mathbb{N}} A_n = (0, 1]
+$$
+
+です。$0 < x \le 1$ ならば、$\tfrac1n \le x$ となる $n$ がある（アルキメデスの性質）ので、$x$ はどれかの $A_n$ に属します。一方、$0$ はどの $A_n$ にも属しません。**どの $A_n$ も 0 を含まないのに、和集合の左端は 0 にいくらでも近づく**ことに注意しましょう。
+</Example>
+
+集合族に対しても、ド・モルガンの法則が成り立ちます。
+
+$$
+\Bigl(\bigcup_{i \in I} A_i\Bigr)^c = \bigcap_{i \in I} A_i^c, \qquad \Bigl(\bigcap_{i \in I} A_i\Bigr)^c = \bigcup_{i \in I} A_i^c
+$$
+
+証明は定理 3.4 と同じで、論理のド・モルガンの法則の代わりに量化子の否定（定理 2.5）を使います。
+
+## 演習問題
+
+<Exercise level={1} label="問 3.1">
+$U = \{1, 2, \dots, 8\}$、$A = \{1, 2, 3, 4\}$、$B = \{2, 4, 6, 8\}$ とする。次を求めよ。
+
+1. $A \cap B$　2. $A \cup B$　3. $A \setminus B$　4. $(A \cup B)^c$　5. $A^c \cap B^c$
+
+<Reveal>
+1. $\{2, 4\}$　2. $\{1, 2, 3, 4, 6, 8\}$　3. $\{1, 3\}$　4. $\{5, 7\}$　5. $A^c = \{5, 6, 7, 8\}$、$B^c = \{1, 3, 5, 7\}$ より $\{5, 7\}$。
+
+4 と 5 が一致するのは、ド・モルガンの法則のとおりです。
+</Reveal>
+</Exercise>
+
+<Exercise level={1} label="問 3.2">
+$(A \cap B)^c = A^c \cup B^c$ を、定理 3.4 の証明にならって示せ。
+
+<Reveal>
+$x \in U$ について、
+
+$$
+\begin{aligned}
+x \in (A \cap B)^c &\iff \lnot(x \in A \land x \in B) \\
+&\iff (x \notin A) \lor (x \notin B) \\
+&\iff x \in A^c \cup B^c
+\end{aligned}
+$$
+
+2 行目で論理のド・モルガンの法則を使いました。
+</Reveal>
+</Exercise>
+
+<Exercise level={2} label="問 3.3">
+$A \subseteq B$ であることと、$A \cap B = A$ であることが同値であることを示せ。
+
+<Reveal kind="hint">
+同値を示すには「$\Rightarrow$」と「$\Leftarrow$」の両方が必要です。$A \cap B = A$ を示すには、さらに両方向の包含が必要です。
+</Reveal>
+
+<Reveal>
+**（$\Rightarrow$）** $A \subseteq B$ と仮定します。$A \cap B \subseteq A$ はいつでも成り立ちます（定理 3.3 の 5）。逆に $x \in A$ とすると、$A \subseteq B$ より $x \in B$ なので $x \in A \cap B$。よって $A \subseteq A \cap B$ で、$A \cap B = A$ です。
+
+**（$\Leftarrow$）** $A \cap B = A$ と仮定します。$x \in A$ とすると $x \in A \cap B$ なので $x \in B$。よって $A \subseteq B$ です。
+</Reveal>
+</Exercise>
+
+<Exercise level={2} label="問 3.4">
+$A \times (B \cup C) = (A \times B) \cup (A \times C)$ を示せ。
+
+<Reveal>
+$(x, y)$ を順序対とします。
+
+$$
+\begin{aligned}
+(x, y) \in A \times (B \cup C) &\iff x \in A \land (y \in B \lor y \in C) \\
+&\iff (x \in A \land y \in B) \lor (x \in A \land y \in C) \\
+&\iff (x, y) \in (A \times B) \cup (A \times C)
+\end{aligned}
+$$
+
+2 行目は論理の分配法則 $P \land (Q \lor R) \iff (P \land Q) \lor (P \land R)$ です。両辺の要素はどちらも順序対なので、これで等式が示せました。
+</Reveal>
+</Exercise>
+
+<Exercise level={3} label="問 3.5">
+自然数 $n$ に対して $B_n = \left(0,\ \tfrac{1}{n}\right)$（開区間）とする。$\displaystyle\bigcap_{n \in \mathbb{N}} B_n$ を求め、その理由を説明せよ。
+
+<Reveal kind="hint">
+正の実数 $x$ がすべての $B_n$ に属するかどうかを考えます。$\tfrac1n \le x$ となる $n$ はあるでしょうか？
+</Reveal>
+
+<Reveal>
+答えは $\varnothing$ です。
+
+$x \le 0$ ならば、$x$ はどの $B_n$ にも属しません。$x > 0$ ならば、アルキメデスの性質より $n > \tfrac1x$ となる自然数 $n$ があり、このとき $\tfrac1n < x$ なので $x \notin B_n$ です。よって、どの実数もすべての $B_n$ に属することはなく、共通部分は空集合です。
+
+どの $B_n$ も空でなく、しかも $B_1 \supseteq B_2 \supseteq B_3 \supseteq \cdots$ と縮んでいくのに、無限個の共通部分は空になります。有限個の場合とは違う、無限ならではの現象です。
+</Reveal>
+</Exercise>
+
+## まとめ
+
+- 和集合 $\cup$ は「または」、共通部分 $\cap$ は「かつ」、差集合 $A \setminus B$ は「$A$ に属し $B$ に属さない」。補集合は**全体集合を決めてから**考える。
+- 分配法則やド・モルガンの法則は、**要素を1つ取り、場合分けや同値変形をして**証明する。
+- 集合の式の等しさは、ベン図の全部分（真理値表の全行）で確かめられる。
+- 冪集合 $\mathcal{P}(A)$ は部分集合全体。$n$ 個の要素の集合なら $2^n$ 個の要素を持つ。
+- 直積 $A \times B$ は順序対全体。$(a, b) \ne (b, a)$ に注意。
+- 集合族の和集合は「$\exists i$」、共通部分は「$\forall i$」。
+
+次の章では、2つの集合の間の「対応」である**写像**を学びます。

@@ -1,4 +1,6 @@
 ---
+import { inlineMath } from '../lib/inlineMath';
+
 interface Props {
   /** 最初から開いておく */
   open?: boolean;
@@ -9,7 +11,7 @@ const { open = false, title = '証明' } = Astro.props;
 
 <details class="proof" open={open}>
   <summary>
-    <span class="proof-title">{title}</span>
+    <span class="proof-title" set:html={inlineMath(title)} />
     <span class="proof-hint" aria-hidden="true"><span class="when-closed">まず自分で考えてから開こう</span><span class="when-open">閉じる</span></span>
   </summary>
   <div class="proof-body">

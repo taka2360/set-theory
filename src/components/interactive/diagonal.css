@@ -1,0 +1,132 @@
+.diag {
+  margin: 2rem 0;
+  padding: 1rem 1.15rem 1.1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  line-height: 1.6;
+}
+
+.diag-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  margin: 0;
+  font-family: var(--font-head);
+  font-weight: 700;
+}
+
+.diag-badge {
+  font-size: 0.75rem;
+  padding: 0.1em 0.6em;
+  border-radius: 999px;
+  background: var(--pit-bg);
+  color: var(--pit);
+}
+
+.diag-help {
+  margin: 0.5rem 0 0.6rem;
+  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+
+.diag-table-wrap {
+  overflow-x: auto;
+}
+
+.diag-table {
+  border-collapse: separate;
+  border-spacing: 3px;
+  margin: 0 auto;
+  font-family: 'KaTeX_Main', 'Times New Roman', serif;
+  font-size: 1.15rem;
+}
+
+.diag-table th {
+  padding: 0 0.4rem 0 0;
+  text-align: right;
+  font-weight: 400;
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+
+.diag-table td {
+  width: 2rem;
+  height: 2rem;
+  text-align: center;
+  border-radius: 6px;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+
+.diag-table tr.is-current th {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.diag-table td.is-diag {
+  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+}
+
+.diag-table td.is-now {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: none;
+}
+
+.diag-table td.is-seen {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-weight: 700;
+  text-decoration: line-through;
+  text-decoration-color: var(--ng);
+}
+
+.diag-dots {
+  color: var(--muted);
+}
+
+.diag-more th {
+  text-align: center;
+  color: var(--muted);
+}
+
+.diag-result th {
+  color: var(--idea);
+  font-weight: 700;
+}
+
+.diag-result td {
+  border: 1.5px dashed var(--line-strong);
+  color: var(--muted);
+}
+
+.diag-result td.is-filled {
+  border-color: var(--idea);
+  background: var(--idea-bg);
+  color: var(--idea);
+  font-weight: 700;
+}
+
+.diag-status {
+  min-height: 3.2em;
+  margin: 0.7rem 0 0.4rem;
+  font-size: 0.92rem;
+}
+
+.diag-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.diag-caveat {
+  margin: 0.8rem 0 0;
+  padding: 0.55rem 0.8rem;
+  border-radius: var(--radius-sm);
+  background: var(--pit-bg);
+  color: var(--ink-2);
+  font-size: 0.82rem;
+}

@@ -1,0 +1,270 @@
+---
+title: カントール＝ベルンシュタイン＝シュレーダーの定理
+slug: cbs
+chapterKey: cbs-basics-v1
+order: 9
+part: 無限と濃度
+summary: 「A から B へも、B から A へも単射があれば、全単射がある」。濃度の比較を支えるこの定理を、鎖のアイデアで1手ずつ証明します。
+goals:
+  - 定理の主張を正確に述べられる
+  - 証明で全単射 h をどう作るかを、図とともに説明できる
+  - 定理を使って |(0,1)| = |[0,1]| や |ℝ| = |𝒫(ℕ)| を示せる
+prereq: [maps, uncountable]
+minutes: 50
+---
+
+## 定理の主張
+
+第8章で、濃度の大小 $\lvert A \rvert \le \lvert B \rvert$ を「$A$ から $B$ への単射がある」と定義しました。この $\le$ が数の大小と同じように使えるためには、次の定理が必要です。
+
+<Theorem label="定理 9.1" title="カントール＝ベルンシュタイン＝シュレーダーの定理">
+集合 $A$ から $B$ への単射 $f$ と、$B$ から $A$ への単射 $g$ が存在するならば、$A$ から $B$ への全単射が存在する。つまり、
+
+$$
+\lvert A \rvert \le \lvert B \rvert \text{ かつ } \lvert B \rvert \le \lvert A \rvert \implies \lvert A \rvert = \lvert B \rvert
+$$
+</Theorem>
+
+カントールが予想し、シュレーダーとベルンシュタインが独立に証明しました（シュレーダーの最初の証明には誤りがありました）。本によっては「ベルンシュタインの定理」や「シュレーダー＝ベルンシュタインの定理」と呼ばれます。以下では **CBS の定理** と略します。
+
+有限集合なら当たり前に見えます。$A$ が $B$ より多ければ $A \to B$ の単射はなく、少なければ $B \to A$ の単射はないからです。しかし無限集合では、$f$ も $g$ も全射とは限りません。2つの「全射でない単射」から、どうやって全単射を組み立てるのでしょうか。
+
+## 使ってみる
+
+証明の前に、この定理がどれほど便利かを見ておきましょう。全単射を直接作るのは大変でも、**2つの単射を作るだけ**で済むようになります。
+
+<Example title="$\lvert (0, 1) \rvert = \lvert [0, 1] \rvert$">
+- $(0, 1) \to [0, 1]$：$x \mapsto x$（包含写像）は単射。
+- $[0, 1] \to (0, 1)$：$x \mapsto \frac{x}{2} + \frac14$ は単射（値は $[\frac14, \frac34] \subseteq (0, 1)$）。
+
+CBS の定理より、$\lvert (0, 1) \rvert = \lvert [0, 1] \rvert$ です。端点 2 つを付け加える全単射を具体的に書くのは意外と面倒ですが（演習問題 9.3）、単射なら一瞬です。
+</Example>
+
+<Example title="$\lvert \mathbb{R} \rvert = \lvert (0, 1) \rvert$">
+- $(0, 1) \to \mathbb{R}$：包含写像は単射。
+- $\mathbb{R} \to (0, 1)$：$x \mapsto \dfrac{1}{1 + 2^{-x}}$ は狭義単調増加なので単射で、値は $(0, 1)$ に入る。
+
+よって $\lvert \mathbb{R} \rvert = \lvert (0, 1) \rvert$。実数全体と、長さ 1 の区間は同じ濃度です。
+</Example>
+
+## 証明のアイデア：鎖をたどる
+
+$f \colon A \to B$、$g \colon B \to A$ を単射とします。ある $a \in A$ から出発して、$f$ と $g$ を交互にたどってみましょう。
+
+$$
+a \xrightarrow{\ f\ } f(a) \xrightarrow{\ g\ } g(f(a)) \xrightarrow{\ f\ } \cdots
+$$
+
+逆向きにもたどれます。$a \in g(B)$ なら、$g$ が単射なので $g(b) = a$ となる $b$ がただ1つあります（$a$ の「親」）。さらに $b \in f(A)$ なら、$b$ の親 $f^{-1}(b)$ がただ1つある、……。親をさかのぼっていくと、
+
+- (i) **$A$ の要素で行き止まる**（$g(B)$ に入っていない要素にたどり着く）
+- (ii) **$B$ の要素で行き止まる**（$f(A)$ に入っていない要素にたどり着く）
+- (iii) **永遠にさかのぼれる**
+
+のどれかです。(i) のタイプの要素は、$f$ で $B$ に送れば相手と1対1に対応します。(ii) のタイプは、$g$ の逆で $B$ に戻せばうまくいきます。(iii) はどちらでも大丈夫です。
+
+以下の証明では、(i) のタイプの要素全体を集合 $C$ として作り、「$C$ では $f$、$C$ の外では $g^{-1}$」と切り替えて全単射 $h$ を作ります。
+
+<figure>
+<svg viewBox="0 0 560 300" role="img" aria-label="CBS の定理の証明の図。左に集合 A、右に集合 B。A の上側に網掛けの部分 C があり、f で B の上側の f(C) に移る。A の下側の残り A\C は、B の下側の B\f(C) から g によって移ってくる。h は C の上では f、A\C の上では g の逆写像。" style="max-width:560px;width:100%;height:auto;display:block;margin:0 auto">
+  <defs>
+    <marker id="cbs-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--accent)"/></marker>
+    <marker id="cbs-ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--thm)"/></marker>
+    <pattern id="cbs-hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="var(--accent)" stroke-width="2" opacity="0.35"/></pattern>
+  </defs>
+  <rect x="40" y="40" width="160" height="230" rx="24" fill="var(--bg-elev)" stroke="currentColor" stroke-width="1.5"/>
+  <rect x="360" y="40" width="160" height="230" rx="24" fill="var(--bg-elev)" stroke="currentColor" stroke-width="1.5"/>
+  <path d="M40 140 H200 V64 a24 24 0 0 0 -24 -24 H64 a24 24 0 0 0 -24 24 Z" fill="url(#cbs-hatch)" stroke="var(--accent)" stroke-width="1.5"/>
+  <path d="M360 140 H520 V64 a24 24 0 0 0 -24 -24 H384 a24 24 0 0 0 -24 24 Z" fill="url(#cbs-hatch)" stroke="var(--accent)" stroke-width="1.5"/>
+  <line x1="40" y1="140" x2="200" y2="140" stroke="currentColor" stroke-dasharray="5 4" opacity="0.6"/>
+  <line x1="360" y1="140" x2="520" y2="140" stroke="currentColor" stroke-dasharray="5 4" opacity="0.6"/>
+  <path d="M205 90 C 270 70, 300 70, 352 90" fill="none" stroke="var(--accent)" stroke-width="2.4" marker-end="url(#cbs-ar)"/>
+  <path d="M355 205 C 300 225, 260 225, 208 205" fill="none" stroke="var(--thm)" stroke-width="2.4" marker-end="url(#cbs-ar2)"/>
+  <g font-family="KaTeX_Main, Times New Roman, serif" fill="currentColor" text-anchor="middle">
+    <text x="120" y="28" font-size="20" font-style="italic">A</text>
+    <text x="440" y="28" font-size="20" font-style="italic">B</text>
+    <text x="120" y="96" font-size="18" font-style="italic">C</text>
+    <text x="120" y="212" font-size="18"><tspan font-style="italic">A</tspan> ∖ <tspan font-style="italic">C</tspan></text>
+    <text x="440" y="96" font-size="18"><tspan font-style="italic">f</tspan>(<tspan font-style="italic">C</tspan>)</text>
+    <text x="440" y="212" font-size="18"><tspan font-style="italic">B</tspan> ∖ <tspan font-style="italic">f</tspan>(<tspan font-style="italic">C</tspan>)</text>
+    <text x="280" y="62" font-size="17" fill="var(--accent)">h = f</text>
+    <text x="280" y="250" font-size="17" fill="var(--thm)">g（h はこの逆向き）</text>
+  </g>
+</svg>
+<figcaption>$A$ を $C$ とその外に分け、$C$ は $f$ で $f(C)$ へ、$A \setminus C$ は $g$ の逆で $B \setminus f(C)$ へ送る。</figcaption>
+</figure>
+
+## 証明
+
+<Proof title="定理 9.1 の証明" open>
+$f \colon A \to B$、$g \colon B \to A$ を単射とします。
+
+**ステップ 1：集合 $C$ を作る。** $A$ の部分集合の列 $C_0, C_1, C_2, \dots$ を
+
+$$
+C_0 = A \setminus g(B), \qquad C_{n+1} = g\bigl(f(C_n)\bigr) \quad (n \ge 0)
+$$
+
+で定め、$C = \displaystyle\bigcup_{n \ge 0} C_n$ とおきます。$C_0$ は「$g$ で移ってくる親がいない」$A$ の要素、$C_1$ はそこから $f$、$g$ と一往復した先、…です。
+
+**ステップ 2：$h$ を定める。** $h \colon A \to B$ を
+
+$$
+h(a) = \begin{cases} f(a) & (a \in C) \\ g^{-1}(a) & (a \notin C) \end{cases}
+$$
+
+と定めます。ここで $g^{-1}(a)$ は「$g(b) = a$ となるただ1つの $b$」です。これが意味を持つことを確かめます。$a \notin C$ ならば特に $a \notin C_0 = A \setminus g(B)$ なので、$a \in g(B)$、つまり $g(b) = a$ となる $b$ があります。$g$ が単射なので、その $b$ はただ1つです。よって $h$ は写像として定まります。
+
+**ステップ 3：鍵となる事実。** 次が成り立ちます。
+
+$$
+b \in f(C) \iff g(b) \in C \qquad (b \in B)
+$$
+
+（$\Rightarrow$）$b \in f(C)$ なら、ある $n$ で $b \in f(C_n)$ なので、$g(b) \in g(f(C_n)) = C_{n+1} \subseteq C$。
+
+（$\Leftarrow$）$g(b) \in C$ とすると、ある $n$ で $g(b) \in C_n$。$g(b) \in g(B)$ なので $g(b) \notin C_0$、よって $n \ge 1$ で、$g(b) \in C_n = g(f(C_{n-1}))$。つまりある $b' \in f(C_{n-1})$ で $g(b) = g(b')$。$g$ は単射なので $b = b' \in f(C_{n-1}) \subseteq f(C)$。
+
+**ステップ 4：$h$ は単射。** $h(a_1) = h(a_2)$ とします。
+
+- $a_1, a_2 \in C$ のとき：$f(a_1) = f(a_2)$ で、$f$ は単射なので $a_1 = a_2$。
+- $a_1, a_2 \notin C$ のとき：$g^{-1}(a_1) = g^{-1}(a_2)$ の両辺に $g$ を施すと $a_1 = a_2$。
+- $a_1 \in C$、$a_2 \notin C$ のとき：$b = h(a_1) = f(a_1) \in f(C)$ です。一方 $b = h(a_2) = g^{-1}(a_2)$ なので $g(b) = a_2 \notin C$。ステップ 3 より $b \notin f(C)$ となり矛盾。よってこの場合は起こりません。
+
+**ステップ 5：$h$ は全射。** $b \in B$ を任意に取ります。
+
+- $b \in f(C)$ のとき：$b = f(a)$、$a \in C$ となる $a$ があり、$h(a) = f(a) = b$。
+- $b \notin f(C)$ のとき：$a = g(b)$ とおくと、ステップ 3 より $a \notin C$。よって $h(a) = g^{-1}(a) = b$。
+
+以上より $h$ は全単射です。
+</Proof>
+
+<Note title="この証明に選択公理は要らない">
+$C$ も $h$ も、$f$ と $g$ から**具体的なルールで**作りました。どこにも「無数の候補から1つずつ選ぶ」操作はありません。CBS の定理は選択公理なしで証明できます。
+</Note>
+
+<Quiz id="cbs-q01">
+$A = B = \mathbb{N}$、$f(n) = n + 1$、$g(n) = n + 1$ とする（どちらも単射だが全射でない）。証明の集合 $C = \bigcup_n C_n$ は？
+
+<Choice>$\{1\}$</Choice>
+<Choice correct>奇数全体 $\{1, 3, 5, \dots\}$</Choice>
+<Choice>偶数全体 $\{2, 4, 6, \dots\}$</Choice>
+<Choice>$\mathbb{N}$ 全体</Choice>
+
+<Explain>
+$C_0 = \mathbb{N} \setminus g(\mathbb{N}) = \{1\}$、$C_1 = g(f(\{1\})) = \{3\}$、$C_2 = \{5\}$、…なので、$C$ は奇数全体です。このとき $h$ は、奇数 $n$ を $f(n) = n + 1$ に、偶数 $n$ を $g^{-1}(n) = n - 1$ に移します。つまり $1 \leftrightarrow 2$、$3 \leftrightarrow 4$、…を入れ替える全単射になります。
+</Explain>
+</Quiz>
+
+## 応用：実数と冪集合
+
+<Theorem label="定理 9.2">
+$\lvert \mathbb{R} \rvert = \lvert \mathcal{P}(\mathbb{N}) \rvert$
+</Theorem>
+
+<Proof>
+CBS の定理より、両方向の単射を作れば十分です。
+
+**$\mathcal{P}(\mathbb{N}) \to \mathbb{R}$ の単射：** $S \subseteq \mathbb{N}$ に、小数第 $n$ 位が「$n \in S$ なら 1、そうでなければ 0」である数
+
+$$
+\varphi(S) = 0.s_1 s_2 s_3 \cdots \qquad (s_n = 1 \text{ if } n \in S,\ s_n = 0 \text{ otherwise})
+$$
+
+を対応させます。この小数表示は 9 を含まないので標準的な表示です（事実 8.2）。$S \ne T$ なら、ある桁で表示が異なるので、一意性より $\varphi(S) \ne \varphi(T)$ です。
+
+**$\mathbb{R} \to \mathcal{P}(\mathbb{N})$ の単射：** $\mathbb{Q}$ は可算なので、全単射 $q \colon \mathbb{N} \to \mathbb{Q}$ を1つ固定します（$\mathbb{Q}$ の具体的な列挙を第7章で作りました）。実数 $x$ に
+
+$$
+\psi(x) = \{\, n \in \mathbb{N} \mid q(n) < x \,\}
+$$
+
+（「$x$ より小さい有理数の番号の集合」）を対応させます。$x < y$ なら、$x < r < y$ となる有理数 $r$ があり（有理数の稠密性）、その番号は $\psi(y)$ には入るが $\psi(x)$ には入りません。よって $x \ne y$ なら $\psi(x) \ne \psi(y)$ です。
+
+CBS の定理より、$\lvert \mathbb{R} \rvert = \lvert \mathcal{P}(\mathbb{N}) \rvert$ です。
+</Proof>
+
+この濃度を**連続体濃度**といい、$\mathfrak{c}$ で表します（$2^{\aleph_0}$ とも書きます）。カントールの定理と合わせると、$\aleph_0 < \mathfrak{c}$ が別の方法でも確かめられたことになります。
+
+<Quiz id="cbs-q02">
+CBS の定理を使って $\lvert A \rvert = \lvert B \rvert$ を示すとき、必要なものはどれ？
+
+<Choice>$A$ から $B$ への全射と、$B$ から $A$ への全射</Choice>
+<Choice correct>$A$ から $B$ への単射と、$B$ から $A$ への単射</Choice>
+<Choice>$A$ から $B$ への単射と、$A$ から $B$ への全射</Choice>
+<Choice>$A \subseteq B$ であること</Choice>
+
+<Explain>
+CBS の定理の仮定は「両方向の単射」です。3 番目は、同じ向きに単射と全射があっても、それらを組み合わせて全単射が作れるとは限らないので不十分です。4 番目は $\lvert A \rvert \le \lvert B \rvert$ を与えるだけです。（「両方向の全射」からも全単射が作れますが、それを示すには全射から逆向きの単射を作る必要があり、一般には選択公理を使います。）
+</Explain>
+</Quiz>
+
+<Note title="発展：どんな2つの濃度も比べられるか">
+数の大小では、どんな2つの数 $x, y$ も $x \le y$ または $y \le x$ です。濃度ではどうでしょうか。「どんな集合 $A, B$ についても、$\lvert A \rvert \le \lvert B \rvert$ または $\lvert B \rvert \le \lvert A \rvert$」という主張（濃度の比較可能性）は、実は**選択公理と同値**であることが知られています。CBS の定理は選択公理なしで証明できましたが、「比べられること」そのものには選択公理が必要なのです。第10章で、選択公理がこうした場面にどう関わるかを見ます。
+</Note>
+
+## 演習問題
+
+<Exercise level={1} label="問 9.1">
+CBS の定理を使って、$\lvert [0, 1] \rvert = \lvert [0, 2) \rvert$ を示せ。
+
+<Reveal>
+$[0, 1] \to [0, 2)$：$x \mapsto x$ は単射（$[0, 1] \subseteq [0, 2)$）。$[0, 2) \to [0, 1]$：$x \mapsto \frac{x}{2}$ は単射（値は $[0, 1)$）。CBS の定理より濃度は等しい。
+</Reveal>
+</Exercise>
+
+<Exercise level={2} label="問 9.2">
+平面上の単位正方形 $[0, 1) \times [0, 1)$ と区間 $[0, 1)$ の濃度が等しいことを、CBS の定理を使って示せ。
+
+<Reveal kind="hint">
+$[0,1)^2 \to [0,1)$ の単射は、2つの数の標準的な小数表示の桁を**交互に**並べて作ります。ただし、そのままだと末尾が 9 の連続になる表示ができてしまうことがあります。各桁の前に 0 を挟むなどして、9 が続かないように工夫しましょう。
+</Reveal>
+
+<Reveal>
+$[0, 1) \to [0, 1)^2$：$x \mapsto (x, 0)$ は単射です。
+
+$[0, 1)^2 \to [0, 1)$：$x = 0.x_1 x_2 \cdots$、$y = 0.y_1 y_2 \cdots$ を標準的な小数表示とします。各桁を「$0$ を前に付けた 2 桁」と考え、
+
+$$
+\Phi(x, y) = 0.\, 0x_1\, 0y_1\, 0x_2\, 0y_2\, \cdots
+$$
+
+（小数第 $4k - 3, 4k - 2, 4k - 1, 4k$ 位がそれぞれ $0, x_k, 0, y_k$）と定めます。この表示は 2 桁に1回 0 が現れるので「ある桁から先がすべて 9」にはならず、標準的な表示です。$(x, y) \ne (x', y')$ なら、ある桁で $x_k \ne x'_k$ または $y_k \ne y'_k$ となり、$\Phi$ の表示も異なるので、一意性より $\Phi(x, y) \ne \Phi(x', y')$。よって単射です。
+
+CBS の定理より $\lvert [0, 1)^2 \rvert = \lvert [0, 1) \rvert$。正方形と線分は、点の「個数」が同じなのです。これを発見したカントールは、手紙に「私はそれを見ているが、信じられない」と書きました。
+</Reveal>
+</Exercise>
+
+<Exercise level={3} label="問 9.3">
+$(0, 1)$ から $[0, 1]$ への全単射を、CBS の定理を使わずに具体的に作れ。
+
+<Reveal kind="hint">
+ヒルベルトホテルを使います。$(0, 1)$ の中の可算個の点 $\frac12, \frac13, \frac14, \dots$ を「部屋」と考え、新しい客 $0$ と $1$ を泊めましょう。
+</Reveal>
+
+<Reveal>
+$h \colon (0, 1) \to [0, 1]$ を次で定めます。
+
+$$
+h(x) = \begin{cases}
+0 & (x = \tfrac12) \\
+1 & (x = \tfrac13) \\
+\tfrac{1}{n - 2} & (x = \tfrac1n,\ n \ge 4) \\
+x & (\text{それ以外})
+\end{cases}
+$$
+
+$\frac12 \mapsto 0$、$\frac13 \mapsto 1$、$\frac14 \mapsto \frac12$、$\frac15 \mapsto \frac13$、…と、$\frac1n$ の形の点だけを「2つずつずらし」、空いた $0$ と $1$ に $\frac12$、$\frac13$ を入れています。それ以外の点は動かしません。$\frac1n$ の形の点どうし、それ以外の点どうしでそれぞれ1対1に対応しているので、全単射です。
+
+CBS の定理の証明で作られる $h$ も、実はこのような「可算個の点をずらす」形をしています。
+</Reveal>
+</Exercise>
+
+## まとめ
+
+- **CBS の定理**：$A \to B$ と $B \to A$ の単射があれば、$A \to B$ の全単射がある。$\le$ の反対称律が成り立つ。
+- 証明は、$C_0 = A \setminus g(B)$、$C_{n+1} = g(f(C_n))$ の和 $C$ を作り、「$C$ では $f$、外では $g^{-1}$」で全単射を組み立てる。選択公理は要らない。
+- 応用：$\lvert (0,1) \rvert = \lvert [0,1] \rvert = \lvert \mathbb{R} \rvert = \lvert \mathcal{P}(\mathbb{N}) \rvert$（連続体濃度 $\mathfrak{c}$）。正方形と線分の濃度も等しい。
+- 全単射を直接作る代わりに、**両方向の単射を作ればよい**。
+
+いよいよ最終章です。素朴な集合論に潜む落とし穴と、それを乗り越えるための公理、そして選択公理を学びます。

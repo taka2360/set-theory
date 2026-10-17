@@ -1,0 +1,218 @@
+.mapviz {
+  margin: 2rem 0;
+  padding: 1rem 1.15rem 1.1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  line-height: 1.6;
+}
+
+.mapviz-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  margin: 0;
+  font-family: var(--font-head);
+  font-weight: 700;
+}
+
+.mapviz-badge {
+  font-size: 0.75rem;
+  padding: 0.1em 0.6em;
+  border-radius: 999px;
+  background: var(--idea-bg);
+  color: var(--idea);
+}
+
+.mapviz-help {
+  margin: 0.5rem 0 0.4rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.mapviz-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 640px) {
+  .mapviz-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mapviz-svg {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.mapviz-setname {
+  font-family: 'KaTeX_Math', 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 20px;
+  fill: var(--ink);
+}
+
+.mapviz-set {
+  fill: var(--bg-elev);
+  stroke: var(--line-strong);
+  stroke-width: 1.5;
+}
+
+.mapviz-arrow {
+  stroke: var(--accent);
+  stroke-width: 2.2;
+}
+
+.mapviz-arrow.is-bad {
+  stroke: var(--ng);
+  stroke-dasharray: 6 4;
+}
+
+.mapviz-arrowhead {
+  fill: var(--accent);
+}
+
+.mapviz-node {
+  cursor: pointer;
+  outline: none;
+}
+
+.mapviz-node circle {
+  fill: var(--surface);
+  stroke: var(--ink-2);
+  stroke-width: 1.8;
+  transition:
+    fill 0.15s,
+    stroke 0.15s;
+}
+
+.mapviz-node text {
+  font-family: 'KaTeX_Main', 'Times New Roman', serif;
+  font-size: 16px;
+  fill: var(--ink);
+  pointer-events: none;
+}
+
+.mapviz-node:hover circle {
+  stroke: var(--accent);
+}
+
+.mapviz-node:focus-visible circle {
+  stroke: var(--focus);
+  stroke-width: 4;
+}
+
+.mapviz-node.is-selected circle {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+
+.mapviz-node.is-selected text {
+  fill: #fff;
+}
+
+.mapviz-node.is-target circle {
+  stroke-dasharray: 3 3;
+  stroke: var(--accent);
+}
+
+.mapviz-node.is-warn circle {
+  stroke: var(--ng);
+}
+
+.mapviz-node.is-dim circle {
+  fill: var(--bg);
+}
+
+.mapviz-verdicts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.mapviz-verdicts li {
+  display: flex;
+  gap: 0.6em;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.mapviz-verdicts li.is-ok {
+  background: var(--ok-bg);
+}
+
+.mapviz-verdicts li.is-ok b,
+.mapviz-verdicts li.is-ok .mapviz-mark {
+  color: var(--ok);
+}
+
+.mapviz-verdicts li.is-ng {
+  background: var(--bg);
+}
+
+.mapviz-verdicts li.is-ng .mapviz-mark {
+  color: var(--ng);
+}
+
+.mapviz-verdicts small {
+  color: var(--ink-2);
+  font-size: 0.82rem;
+}
+
+.mapviz-mark {
+  font-weight: 700;
+}
+
+.mapviz-bij {
+  margin: 0.6rem 0 0;
+  font-weight: 700;
+  color: var(--ok);
+  font-size: 0.9rem;
+}
+
+.mapviz-actions {
+  margin-top: 0.4rem;
+}
+
+.mapviz-actions .btn {
+  margin-left: -0.6rem;
+  font-size: 0.85rem;
+}
+
+.mapviz-goals {
+  margin-top: 0.8rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elev);
+  border: 1px dashed var(--line-strong);
+}
+
+.mapviz-goals-title {
+  margin: 0 0 0.2rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.mapviz-goals ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.mapviz-goals li.is-done {
+  color: var(--ok);
+  font-weight: 600;
+}

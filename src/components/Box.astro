@@ -1,4 +1,6 @@
 ---
+import { inlineMath } from '../lib/inlineMath';
+
 export type BoxKind = 'definition' | 'theorem' | 'example' | 'pitfall' | 'idea' | 'note';
 
 interface Props {
@@ -20,9 +22,10 @@ const KIND_LABEL: Record<BoxKind, string> = {
 };
 
 const { kind, label = KIND_LABEL[kind], title, id } = Astro.props;
+const plainTitle = title?.replace(/\$/g, '');
 ---
 
-<section class:list={['box', `box-${kind}`]} id={id} aria-label={title ? `${label}：${title}` : label}>
+<section class:list={['box', `box-${kind}`]} id={id} aria-label={plainTitle ? `${label}：${plainTitle}` : label}>
   <header class="box-head">
     <span class="box-icon" aria-hidden="true">
       {kind === 'definition' && '≔'}
@@ -33,7 +36,7 @@ const { kind, label = KIND_LABEL[kind], title, id } = Astro.props;
       {kind === 'note' && 'i'}
     </span>
     <span class="box-label">{label}</span>
-    {title && <span class="box-title">{title}</span>}
+    {title && <span class="box-title" set:html={inlineMath(title)} />}
   </header>
   <div class="box-body">
     <slot />

@@ -1,4 +1,6 @@
 ---
+import { inlineMath } from '../lib/inlineMath';
+
 interface Props {
   /** 1: 基本 / 2: 標準 / 3: 発展 */
   level: 1 | 2 | 3;
@@ -16,7 +18,7 @@ const { level, label, title } = Astro.props;
       <span aria-hidden="true">{'●'.repeat(level)}{'○'.repeat(3 - level)}</span>
       {LEVELS[level]}
     </span>
-    {title && <span class="ex-title">{title}</span>}
+    {title && <span class="ex-title" set:html={inlineMath(title)} />}
   </header>
   <div class="ex-body"><slot /></div>
 </section>
