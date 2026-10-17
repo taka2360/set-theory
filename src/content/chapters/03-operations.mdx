@@ -167,7 +167,7 @@ $A \setminus B = \{1\}$（$A$ のうち $B$ に入っていないもの）、$B 
 <Choice>$A \cup (B \setminus A) = B$</Choice>
 
 <Explain>
-$x \in A \setminus (A \setminus B)$ は「$x \in A$ かつ、$x \in A$ かつ $x \notin B$ ではない」で、整理すると「$x \in A$ かつ $x \in B$」です。2 番目は $(A \cup B) \setminus B = A \setminus B$ なので、$A$ と $B$ が交わると成り立ちません（$A = B = \{1\}$ が反例）。4 番目は $A \cup (B \setminus A) = A \cup B$ です。
+$x \in A \setminus (A \setminus B)$ は「$x \in A$ かつ、$x \in A$ かつ $x \notin B$ ではない」で、整理すると「$x \in A$ かつ $x \in B$」です。1 番目は $A = \{1\}$、$B = \varnothing$ とすると $A \setminus B = \{1\}$、$B \setminus A = \varnothing$ で成り立ちません。2 番目は $(A \cup B) \setminus B = A \setminus B$ なので、$A$ と $B$ が交わると成り立ちません（$A = B = \{1\}$ が反例）。4 番目は $A \cup (B \setminus A) = A \cup B$ なので、$A \not\subseteq B$ のとき成り立ちません（$A = \{1\}$、$B = \varnothing$ が反例）。
 </Explain>
 </Quiz>
 

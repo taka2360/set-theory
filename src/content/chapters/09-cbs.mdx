@@ -260,6 +260,22 @@ CBS の定理の証明で作られる $h$ も、実はこのような「可算�
 </Reveal>
 </Exercise>
 
+<Exercise level={2} label="問 9.4">
+$\lvert A \rvert < \lvert B \rvert$ かつ $\lvert B \rvert < \lvert C \rvert$ ならば、$\lvert A \rvert < \lvert C \rvert$ であることを示せ。
+
+<Reveal kind="hint">
+$\lvert A \rvert \le \lvert C \rvert$ は単射の合成で分かります。難しいのは「$\lvert A \rvert = \lvert C \rvert$ ではない」ほうです。$\lvert A \rvert = \lvert C \rvert$ と仮定して、$\lvert B \rvert = \lvert C \rvert$ を導きましょう。
+</Reveal>
+
+<Reveal>
+単射 $f \colon A \to B$、$g \colon B \to C$ を取ると、$g \circ f \colon A \to C$ は単射（定理 4.7）なので、$\lvert A \rvert \le \lvert C \rvert$ です。
+
+次に、$\lvert A \rvert = \lvert C \rvert$ と仮定して矛盾を導きます。全単射 $h \colon A \to C$ を取ると、$f \circ h^{-1} \colon C \to B$ は単射なので $\lvert C \rvert \le \lvert B \rvert$ です。仮定から $\lvert B \rvert \le \lvert C \rvert$ でもあるので、CBS の定理より $\lvert B \rvert = \lvert C \rvert$ となり、$\lvert B \rvert < \lvert C \rvert$ に矛盾します。よって $\lvert A \rvert < \lvert C \rvert$ です。
+
+これで、第8章の $\lvert \mathbb{N} \rvert < \lvert \mathcal{P}(\mathbb{N}) \rvert < \lvert \mathcal{P}(\mathcal{P}(\mathbb{N})) \rvert < \cdots$ の離れたもの同士も比べられるようになりました。
+</Reveal>
+</Exercise>
+
 ## まとめ
 
 - **CBS の定理**：$A \to B$ と $B \to A$ の単射があれば、$A \to B$ の全単射がある。$\le$ の反対称律が成り立つ。
