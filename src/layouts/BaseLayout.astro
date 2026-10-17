@@ -15,7 +15,7 @@ interface Props {
 
 const SITE_NAME = 'ゼロからの集合論';
 // フォントは描画を止めないよう非同期で読み込む（読み込むまではシステムフォント）
-const FONT_CSS = 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap';
+const FONT_CSS = 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&display=swap';
 const { title, description = '高校生のための、大学の集合論入門。集合・論理・写像・関係・無限の濃度・選択公理までを、図と演習で基礎から学べる無料の教材です。', noindex = false } = Astro.props;
 const fullTitle = title === SITE_NAME ? `${SITE_NAME} — 高校数学から無限の向こう側まで` : `${title}｜${SITE_NAME}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -137,7 +137,7 @@ const nav = [
     color: var(--ink);
     text-decoration: none;
     font-family: var(--font-head);
-    font-weight: 500;
+    font-weight: 700;
     font-size: 1.02rem;
     letter-spacing: 0.04em;
     white-space: nowrap;

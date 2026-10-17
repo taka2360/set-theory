@@ -37,7 +37,8 @@
   --shadow: 0 1px 2px rgb(20 20 40 / 0.05), 0 4px 16px rgb(20 20 40 / 0.05);
   --shadow-lg: 0 2px 6px rgb(20 20 40 / 0.06), 0 16px 40px rgb(20 20 40 / 0.1);
 
-  --font-body: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic UI', 'Meiryo', system-ui, sans-serif;
+  /* 本文は端末のフォント（Web フォントを待たずに表示する）。Windows では UD フォントを優先 */
+  --font-body: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'BIZ UDPGothic', 'Noto Sans CJK JP', 'Meiryo', system-ui, sans-serif;
   --font-head: 'Noto Sans JP', var(--font-body);
   --font-mono: ui-monospace, 'SFMono-Regular', 'Cascadia Code', Consolas, monospace;
 
