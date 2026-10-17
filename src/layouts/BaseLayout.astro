@@ -14,8 +14,6 @@ interface Props {
 }
 
 const SITE_NAME = 'ゼロからの集合論';
-// フォントは描画を止めないよう非同期で読み込む（読み込むまではシステムフォント）
-const FONT_CSS = 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700&display=swap';
 const { title, description = '高校生のための、大学の集合論入門。集合・論理・写像・関係・無限の濃度・選択公理までを、図と演習で基礎から学べる無料の教材です。', noindex = false } = Astro.props;
 const fullTitle = title === SITE_NAME ? `${SITE_NAME} — 高校数学から無限の向こう側まで` : `${title}｜${SITE_NAME}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -50,11 +48,6 @@ const nav = [
     <meta property="og:image" content={ogImage} />
     <meta property="og:locale" content="ja_JP" />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href={FONT_CSS} />
-    <link rel="stylesheet" href={FONT_CSS} media="print" onload="this.media='all'" />
-    <noscript><link rel="stylesheet" href={FONT_CSS} /></noscript>
     <script is:inline>
       try {
         const t = localStorage.getItem('setTheory:theme');

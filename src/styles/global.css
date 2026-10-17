@@ -39,7 +39,8 @@
 
   /* 本文は端末のフォント（Web フォントを待たずに表示する）。Windows では UD フォントを優先 */
   --font-body: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'BIZ UDPGothic', 'Noto Sans CJK JP', 'Meiryo', system-ui, sans-serif;
-  --font-head: 'Noto Sans JP', var(--font-body);
+  /* 外部の Web フォントは使わない（表示速度とプライバシーのため） */
+  --font-head: var(--font-body);
   --font-mono: ui-monospace, 'SFMono-Regular', 'Cascadia Code', Consolas, monospace;
 
   --measure: 42rem;
